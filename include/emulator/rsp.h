@@ -39,6 +39,24 @@ extern "C" {
 #define AUDIO_SEGMENT_ADDRESS(pRSP, nOffsetRDRAM) \
     (pRSP->anAudioBaseSegment[((nOffsetRDRAM) >> 24) & 0xF] + ((nOffsetRDRAM) & 0xFFFFFF))
 
+#define G_OBJLT_TXTRBLOCK 0x00001033
+#define G_OBJLT_TXTRTILE 0x00FC1034
+#define G_OBJLT_TLUT 0x00000030
+
+#define G_IM_SIZ_4b 0
+#define G_IM_SIZ_8b 1
+#define G_IM_SIZ_16b 2
+#define G_IM_SIZ_32b 3
+
+#define G_IM_FMT_RGBA 0
+#define G_IM_FMT_YUV 1
+#define G_IM_FMT_CI 2
+#define G_IM_FMT_IA 3
+#define G_IM_FMT_I 4
+
+#define G_TX_WRAP (1 << 0)
+#define G_TX_CLAMP (1 << 1)
+
 typedef enum __anon_0x581E7 {
     RUT_NOCODE = -1,
     RUT_ABI1 = 0,

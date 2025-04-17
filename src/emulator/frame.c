@@ -40,6 +40,8 @@ static bool frameDrawSetupDP(Frame* pFrame, s32* pnColors, bool* pbFlag, s32 nVe
 static bool frameDrawRectFill(Frame* pFrame, Rectangle* pRectangle);
 static bool frameDrawTriangle_Setup(Frame* pFrame, Primitive* pPrimitive);
 static bool frameDrawRectTexture_Setup(Frame* pFrame, Rectangle* pRectangle);
+static bool frameDrawLine_Setup(Frame* pFrame, Primitive* pPrimitive);
+static bool frameDrawRectFill_Setup(Frame* pFrame, Rectangle* pRectangle);
 static inline void CopyCFB(u16* srcP);
 static bool packTakeBlocks(s32* piPack, u32* anPack, s32 nPackCount, s32 nBlockCount);
 static inline bool packFreeBlocks(s32* piPack, u32* anPack, s32 nPackCount);
@@ -49,6 +51,15 @@ static bool frameUpdateCache(Frame* pFrame);
 static inline bool frameGetMatrixHint(Frame* pFrame, u32 nAddress, s32* piHint);
 static bool frameResetCache(void);
 static bool frameSetupCache(Frame* pFrame);
+
+//! TODO: inline not inlining??
+#define frameDrawReset_inline(pFrame, flag) {                       \
+    pFrame->nFlag |= flag;                                          \
+    pFrame->aDraw[0] = (FrameDrawFunc)frameDrawLine_Setup;          \
+    pFrame->aDraw[1] = (FrameDrawFunc)frameDrawTriangle_Setup;      \
+    pFrame->aDraw[2] = (FrameDrawFunc)frameDrawRectFill_Setup;      \
+    pFrame->aDraw[3] = (FrameDrawFunc)frameDrawRectTexture_Setup;   \
+}
 
 _XL_OBJECTTYPE gClassFrame = {
     "Frame",
@@ -73,10 +84,7 @@ GXTexCoordID ganNameTexCoord[] = {
 };
 
 s32 lbl_80172710[] = {
-    0x000000BE,
-    0x000000BE,
-    0x000000BE,
-    0x00000000,
+    190, 190, 190, 0
 };
 
 s32 sCommandCodes_1679[] = {
@@ -750,7 +758,60 @@ static bool frameLoadTile(Frame* pFrame, FrameTexture** ppTexture, s32 iTileCode
     return true;
 }
 
-// fn_8004A020
+static inline void fn_8004A020_inline(s32 index) {
+    if (lbl_80172710[index] > 255) {
+        lbl_80172710[index] = 0;
+    }
+
+    if (lbl_80172710[index] < 0) {
+        lbl_80172710[index] = 255;
+    }
+}
+
+s32 fn_8004A020(Frame *pFrame) {
+    GXColor sp8;
+
+    if (lbl_80172710[0] != 255 || lbl_80172710[1] != 255 || lbl_80172710[2] != 255) {
+        pFrame->nMode &= ~0x40000000;
+        frameDrawSetup2D(pFrame);
+        GXSetNumTevStages(1);
+        GXSetNumChans(1);
+        GXSetNumTexGens(0);
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_C0);
+        GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+        GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR_NULL);
+        GXClearVtxDesc();
+        GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_TEX_ST, GX_RGBA6, 0);
+        GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+        fn_8004A020_inline(0);
+        fn_8004A020_inline(1);
+        fn_8004A020_inline(2);
+
+        if (lbl_80172710[0] != 255 || lbl_80172710[1] != 255 || lbl_80172710[2] != 255) {
+            sp8.r = lbl_80172710[0];
+            sp8.g = lbl_80172710[1];
+            sp8.b = lbl_80172710[2];
+            sp8.a = 255;
+
+            GXSetTevColor(GX_TEVREG0, sp8);
+            GXSetBlendMode(GX_BM_BLEND, GX_BL_ZERO, GX_BL_DSTCLR, GX_LO_NOOP);
+            GXBegin(GX_QUADS, GX_VTXFMT0, 4U);
+            GXPosition3f32(0.0f, 0.0f, 0.0f);
+            GXPosition3f32(N64_FRAME_WIDTH, 0.0f, 0.0f);
+            GXPosition3f32(N64_FRAME_WIDTH, N64_FRAME_HEIGHT, 0.0f);
+            GXPosition3f32(0.0f, N64_FRAME_HEIGHT, 0.0f);
+        }
+
+        pFrame->nMode = 0;
+        pFrame->nModeVtx = -1U;
+        frameDrawReset_inline(pFrame, 0x47F2D);
+    }
+    return 1;
+}
 
 static inline void fn_8004A314_inline(Mtx44 mtx, f32 a[4], f32 d) {
     f32 length;
@@ -839,9 +900,7 @@ void fn_8004A314(Frame* pFrame) {
     }
 }
 
-// frameDrawSetupFog_StarFox
-
-bool frameDrawSetupFog_Default(Frame* pFrame) {
+bool frameDrawSetupFog_StarFox(Frame* pFrame) {
     GXColor color;
     GXFogType nFogType;
     f32 rNear;
@@ -850,7 +909,9 @@ bool frameDrawSetupFog_Default(Frame* pFrame) {
     f32 rOffset;
     f32 rStart;
     f32 rEnd;
+    f32 var_f5;
     f32 var_f6;
+    f32 var_f9;
 
     rMultiplier = (s16)(pFrame->aMode[0] >> 16);
     rOffset = (s16)(pFrame->aMode[0] & 0xFFFF);
@@ -864,9 +925,84 @@ bool frameDrawSetupFog_Default(Frame* pFrame) {
         GXSetFog(GX_FOG_NONE, color, 0.0f, 0.0f, 0.0f, 1000.0f);
         return true;
     }
+
     var_f6 = -rOffset;
-    rStart = pFrame->unknown[3][2] / ((var_f6 / rMultiplier) - (pFrame->unknown[2][2] / pFrame->unknown[2][3]));
-    var_f6 = (249.0f + var_f6) / rMultiplier;
+    var_f9 = var_f6 / rMultiplier;
+    rStart = pFrame->unknown[3][2] / (var_f9 - (pFrame->unknown[2][2] / pFrame->unknown[2][3]));
+
+    var_f5 = 253.0f;
+    var_f6 = var_f5 + var_f6;
+    var_f6 = (var_f6) / rMultiplier;
+
+    if (rStart < rNear) {
+        rStart = rNear;
+    }
+    if (rStart > rFar) {
+        rStart = rFar;
+    }
+    if (var_f6 > 1.2f) {
+        nFogType = GX_FOG_EXP;
+        rStart = -rOffset / rMultiplier;
+        rEnd = (rMultiplier + rOffset) / 256.0f;
+        rEnd = 1.0f - rEnd;
+        rEnd = rEnd * (rFar - rNear) + rNear;
+    } else {
+        if (var_f6 > 1.0f) {
+            var_f6 = 1.0f;
+        }
+        rEnd = pFrame->unknown[3][2] / (var_f6 - (pFrame->unknown[2][2] / pFrame->unknown[2][3]));
+        if (rEnd < rNear) {
+            rEnd = rNear;
+        }
+        if (rEnd > rFar) {
+            rEnd = rFar;
+        }
+    }
+
+    rNear *= 0.1f;
+    if (((pFrame->aMode[FMT_OTHER0] >> 26) & 3) == 1 || (pFrame->aMode[FMT_OTHER0] >> 30) == 3 ||
+        ((pFrame->aMode[FMT_OTHER0] >> 22) & 3) == 3) {
+        GXSetFog(nFogType, color, rStart, rEnd, rNear, rFar);
+    } else {
+        GXSetFog(GX_FOG_NONE, color, 0.0f, 0.0f, 0.0f, 1000.0f);
+    }
+    return true;
+}
+
+bool frameDrawSetupFog_Default(Frame* pFrame) {
+    GXColor color;
+    GXFogType nFogType;
+    f32 rNear;
+    f32 rFar;
+    f32 rMultiplier;
+    f32 rOffset;
+    f32 rStart;
+    f32 rEnd;
+    f32 var_f5;
+    f32 var_f6;
+    f32 var_f9;
+
+    rMultiplier = (s16)(pFrame->aMode[0] >> 16);
+    rOffset = (s16)(pFrame->aMode[0] & 0xFFFF);
+
+    rFar = pFrame->unk_3F210;
+    rNear = pFrame->unk_3F214;
+    color = pFrame->aColor[FCT_FOG];
+    nFogType = GX_FOG_EXP;
+
+    if ((rOffset == rMultiplier) && (0.0f == rOffset)) {
+        GXSetFog(GX_FOG_NONE, color, 0.0f, 0.0f, 0.0f, 1000.0f);
+        return true;
+    }
+
+    var_f6 = -rOffset;
+    var_f9 = var_f6 / rMultiplier;
+    rStart = pFrame->unknown[3][2] / (var_f9 - (pFrame->unknown[2][2] / pFrame->unknown[2][3]));
+
+    var_f5 = 249.0f;
+    var_f6 = var_f5 + var_f6;
+    var_f6 = (var_f6) / rMultiplier;
+
     if (rStart < rNear) {
         rStart = rNear;
     }
@@ -3278,11 +3414,7 @@ static inline bool frameTransposeMatrix(Mtx44 matrixTarget, Mtx44 matrixSource) 
 }
 
 bool frameDrawReset(Frame* pFrame, s32 nFlag) {
-    pFrame->nFlag |= nFlag;
-    pFrame->aDraw[0] = (FrameDrawFunc)frameDrawLine_Setup;
-    pFrame->aDraw[1] = (FrameDrawFunc)frameDrawTriangle_Setup;
-    pFrame->aDraw[2] = (FrameDrawFunc)frameDrawRectFill_Setup;
-    pFrame->aDraw[3] = (FrameDrawFunc)frameDrawRectTexture_Setup;
+    frameDrawReset_inline(pFrame, nFlag);
     return true;
 }
 
