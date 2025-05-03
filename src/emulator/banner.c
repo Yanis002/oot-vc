@@ -42,33 +42,46 @@ static u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
 static u8 sBannerBuffer[0x1000];
 static NANDBanner* sBanner;
 
-static inline void fn_80063F30_Inline(NANDResult result) {
-    struct_80174988* var_r4;
-
-    if (result == NAND_RESULT_OK) {
-        return;
+static inline void fn_80063F30_Inline2(ErrorIndex eStringIndex) {
+    switch (eStringIndex) {
+        default:
+            break;
+        case ERROR_NULL:
+            errorDisplayShow(eStringIndex);
+            break;
     }
+}
+
+static inline void fn_80063F30_Inline3(NANDResult result) {
+    volatile struct_80174988* var_r4;
 
     for (var_r4 = lbl_80174988; var_r4->result != NAND_RESULT_OK; var_r4++) {
         if (var_r4->result == result) {
-            if (var_r4->eStringIndex == SI_NULL) {
-                return;
-            }
-            errordisplayShow(var_r4->eStringIndex);
-            return;
+            fn_80063F30_Inline2(var_r4->eStringIndex);
+            break;
         }
     }
 }
 
-static inline s32 __fn_80063F30(char* szBannerFileName, u32 arg1) {
+static inline void fn_80063F30_Inline(NANDResult result) {
+    switch (result) {
+        default:
+            break;
+        case NAND_RESULT_OK:
+            fn_80063F30_Inline3(result);
+            return;
+    }
+}
+
+s32 __fn_80063F30(char* arg0, u32 arg1) {
     NANDFileInfo nandFileInfo;
     u32 length;
     s32 openResult;
 
     length = 0;
-    openResult = NANDSafeOpen(szBannerFileName, &nandFileInfo, 1, sBannerBuffer, ARRAY_COUNT(sBannerBuffer));
+    openResult = NANDSafeOpen(arg0, &nandFileInfo, 1, sBannerBuffer, ARRAY_COUNT(sBannerBuffer));
 
-    switch (openResult) {
+    switch(openResult) {
         case NAND_RESULT_AUTHENTICATION:
         case NAND_RESULT_ECC_CRIT:
             return 1;
@@ -85,9 +98,9 @@ static inline s32 __fn_80063F30(char* szBannerFileName, u32 arg1) {
 
     if (length == arg1) {
         return 1;
-    } else {
-        return 0;
     }
+
+    return 0;
 }
 
 static s32 fn_80063F30(char* szBannerFileName, u32 arg1) {
@@ -95,11 +108,12 @@ static s32 fn_80063F30(char* szBannerFileName, u32 arg1) {
     return __fn_80063F30(szBannerFileName, arg1);
 }
 
-static s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
+s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
     NANDFileInfo arg10;
-    char arg8[0x20];
-    NANDResult result;
+    u8 arg8[32] ATTRIBUTE_ALIGN(32);
     s32 var_r31;
+    s32 var_r30;
+    NANDResult result;
 
     result = NANDCreate(szFileName, 0x34, 0);
     if (result != NAND_RESULT_OK && result != NAND_RESULT_EXISTS) {
@@ -111,22 +125,18 @@ static s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
         return 0;
     }
 
-    memset(arg8, arg1, ARRAY_COUNT(arg8));
-    DCFlushRange(arg8, ARRAY_COUNT(arg8));
+    var_r30 = arg1 >> 5;
+    memset(arg8, arg2, sizeof(arg8));
+    DCFlushRange(arg8, sizeof(arg8));
 
-    var_r31 = 0;
-    while (var_r31 < (arg1 >> 5)) {
-        result = NANDWrite(&arg10, &arg8, 0x20);
-
-        if (result >= NAND_RESULT_OK) {
-            var_r31 += 1;
-            continue;
+    for (var_r31 = 0; var_r31 < var_r30; var_r31++) {
+        result = NANDWrite(&arg10, &arg8, sizeof(arg8));
+        if (result < NAND_RESULT_OK) {
+            break;
         }
-
-        break;
     }
 
-    result = NANDSafeClose(&arg10);
+    NANDSafeClose(&arg10);
     if (result < NAND_RESULT_OK) {
         return 0;
     }
