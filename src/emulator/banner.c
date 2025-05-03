@@ -39,7 +39,7 @@ static void fn_8006496C(void);
 static u8 lbl_8025C888[] = {0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03};
 static u8 lbl_8025C890[] = {0x01, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x04};
 
-static u8 sBannerBuffer[0x1000];
+static u8 sBannerBuffer[BANNER_SIZE];
 static NANDBanner* sBanner;
 
 static inline void fn_80063F30_Inline2(ErrorIndex eStringIndex) {
@@ -73,15 +73,15 @@ static inline void fn_80063F30_Inline(NANDResult result) {
     }
 }
 
-s32 __fn_80063F30(char* arg0, u32 arg1) {
+static inline s32 __fn_80063F30(char* arg0, u32 arg1) {
     NANDFileInfo nandFileInfo;
     u32 length;
     s32 openResult;
 
     length = 0;
-    openResult = NANDSafeOpen(arg0, &nandFileInfo, 1, sBannerBuffer, ARRAY_COUNT(sBannerBuffer));
+    openResult = NANDSafeOpen(arg0, &nandFileInfo, 1, sBannerBuffer, sizeof(sBannerBuffer));
 
-    switch(openResult) {
+    switch (openResult) {
         case NAND_RESULT_AUTHENTICATION:
         case NAND_RESULT_ECC_CRIT:
             return 1;
@@ -103,6 +103,7 @@ s32 __fn_80063F30(char* arg0, u32 arg1) {
     return 0;
 }
 
+// non-matching
 static s32 fn_80063F30(char* szBannerFileName, u32 arg1) {
     NO_INLINE2();
     return __fn_80063F30(szBannerFileName, arg1);
@@ -120,7 +121,7 @@ s32 fn_800640BC(char* szFileName, u32 arg1, s32 arg2) {
         return 0;
     }
 
-    result = NANDSafeOpen(szFileName, &arg10, 3, sBannerBuffer, ARRAY_COUNT(sBannerBuffer));
+    result = NANDSafeOpen(szFileName, &arg10, 3, sBannerBuffer, sizeof(sBannerBuffer));
     if (result != NAND_RESULT_OK) {
         return 0;
     }
@@ -170,11 +171,11 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
         }
 
         if (NANDGetHomeDir((char*)sp10) != NAND_RESULT_OK) {
-            errordisplayShow(SI_ERROR_MAX_FILES);
+            errorDisplayShow(ERROR_MAX_FILES);
         }
 
         if (fn_800B48C4((char*)sp10) != NAND_RESULT_OK) {
-            errordisplayShow(SI_ERROR_MAX_FILES);
+            errorDisplayShow(ERROR_MAX_FILES);
         }
 
         lbl_8025D130 = true;
@@ -192,7 +193,7 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
         lbl_8025D12C |= var_r3;
 
         if (lbl_8025D12C & 0x11) {
-            if (!errordisplayShow(SI_ERROR_SYS_CORRUPT)) {
+            if (!errorDisplayShow(ERROR_SYS_CORRUPT)) {
                 return 0;
             }
 
@@ -217,23 +218,23 @@ s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3
                 var_r3_2 += temp_r25;
             }
 
-            sStringDraw[SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU].unk38 = var_r4_4;
-            sStringDraw[SI_ERROR_INS_SPACE].unk38 = ((var_r3_2 << 0xE) + 0x1FFFF) / 131072;
+            sStringDraw[ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU].unk38 = var_r4_4;
+            sStringDraw[ERROR_INS_SPACE].unk38 = ((var_r3_2 << 0xE) + 0x1FFFF) / 131072;
 
-            fn_80063F30_UnknownInline(NANDCheck(var_r3_2, var_r4_4, &spC));
+            fn_80063F30_Inline(NANDCheck(var_r3_2, var_r4_4, &spC));
 
             if (spC & 5) {
-                if (!errordisplayShow(SI_ERROR_INS_SPACE)) {
+                if (!errorDisplayShow(ERROR_INS_SPACE)) {
                     return 0;
                 }
             } else if (spC & 0xA) {
-                if (!errordisplayShow(SI_ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU)) {
+                if (!errorDisplayShow(ERROR_CHOICE_PRESS_A_TO_RETURN_TO_MENU)) {
                     return 0;
                 }
             } else if ((!(lbl_8025D12C & 0x20) || bannerWrite()) && (lbl_8025D12C & 2)) {
                 fn_800640BC(szFileName, temp_r25, arg3);
             }
-        } else if (bannerNANDOpen(szFileName, nandFileInfo, access, sBannerBuffer, ARRAY_COUNT(sBannerBuffer)) ==
+        } else if (bannerNANDOpen(szFileName, nandFileInfo, access, sBannerBuffer, sizeof(sBannerBuffer)) ==
                    NAND_RESULT_OK) {
             return 1;
         }
