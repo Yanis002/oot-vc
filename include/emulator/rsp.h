@@ -326,7 +326,7 @@ bool rspFrameComplete(Rsp* pRSP);
 bool rspUpdate(Rsp* pRSP, RspUpdateMode eMode);
 bool rspEvent(Rsp* pRSP, s32 nEvent, void* pArgument);
 
-//! TODO: document these
+//! TODO: document this
 bool fn_8007D688(Rsp* pRSP, void** pBuffer, s32 unk1, s32 unk2);
 
 extern _XL_OBJECTTYPE gClassRSP;

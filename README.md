@@ -1,11 +1,15 @@
 oot-vc  
-[![Build Status]][actions] ![oot-j] [![Discord Badge]][discord]
+[![Build Status]][actions] ![oot-j] ![oot-u] ![oot-e] [![Discord Badge]][discord]
 =============
 
 [Build Status]: https://github.com/zeldaret/oot-vc/actions/workflows/build.yml/badge.svg
 [actions]: https://github.com/zeldaret/oot-vc/actions/workflows/build.yml
 
-[oot-j]: https://img.shields.io/endpoint?label=oot-j&url=https%3A%2F%2Fprogress.decomp.club%2Fdata%2Foot-vc%2Foot-j%2Fdol%2F%3Fmode%3Dshield%26measure%3Dcode
+[oot-j]: https://decomp.dev/zeldaret/oot-vc/oot-j.svg?mode=shield&label=oot-j
+
+[oot-u]: https://decomp.dev/zeldaret/oot-vc/oot-u.svg?mode=shield&label=oot-u
+
+[oot-e]: https://decomp.dev/zeldaret/oot-vc/oot-e.svg?mode=shield&label=oot-e
 
 [Discord Badge]: https://img.shields.io/discord/688807550715560050?color=%237289DA&logo=discord&logoColor=%23FFFFFF
 [discord]: https://discord.zelda.deco.mp/
@@ -15,6 +19,8 @@ A work-in-progress decompilation of the N64 emulator used in the Wii Virtual Con
 Supported versions:
 
 - `oot-j`: The Legend of Zelda: Ocarina of Time (Wii Virtual Console) - Japan
+- `oot-u`: The Legend of Zelda: Ocarina of Time (Wii Virtual Console) - North America
+- `oot-e`: The Legend of Zelda: Ocarina of Time (Wii Virtual Console) - Europe/Australia
 
 Currently the decompilation mainly targets the `oot-j` version.
 
@@ -64,7 +70,7 @@ To get objdiff to work properly you also need to add the path to the folder cont
 
 2. Extract the following binary containing the N64 emulator from the wad of the version you want to build:
 
-  * `oot-j`: `content1.app`
+  * `content1.app`
 
   Then, copy the app file and place it in the repo as `orig/<version>/content1.app`.
 

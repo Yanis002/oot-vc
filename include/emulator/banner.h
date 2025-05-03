@@ -14,7 +14,7 @@ extern "C" {
 
 typedef struct struct_80174988 {
     NANDResult result;
-    StringIndex eStringIndex;
+    ErrorIndex eErrorIndex;
 } struct_80174988;
 
 s32 fn_800641CC(NANDFileInfo* nandFileInfo, char* szFileName, u32 arg2, s32 arg3, u8 access);
