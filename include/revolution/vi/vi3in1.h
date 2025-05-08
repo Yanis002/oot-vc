@@ -13,6 +13,7 @@ void __VISetRGBModeImm(void);
 
 void __VISetRevolutionModeSimple(void);
 void __VISetYUVSEL(VIBool outsel) NO_INLINE;
+void fn_8009C5B0(VIGamma gamma);
 
 #ifdef __cplusplus
 }

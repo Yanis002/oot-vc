@@ -1321,6 +1321,90 @@ bool frameHackCIMG_Zelda(Frame* pFrame, FrameBuffer* pBuffer, u64* pnGBI, u32 nC
     return true;
 }
 
+bool fn_8004B940(Frame* pFrame, Cpu* pCPU) {
+    CpuFunction* pFunction;
+
+    if (pFrame->bPauseThisFrame != 0) {
+        pFrame->bPauseThisFrame++;
+        switch (pFrame->bPauseThisFrame & 0xFF) {
+            case 0x02:
+                fn_8009C5B0(VI_GM_0_8);
+                break;
+            case 0x03:
+                fn_8009C5B0(VI_GM_0_6);
+                break;
+            case 0x04:
+                fn_8009C5B0(VI_GM_0_4);
+                break;
+            case 0x05:
+                fn_8009C5B0(VI_GM_0_6);
+                break;
+            case 0x06:
+                fn_8009C5B0(VI_GM_0_8);
+                break;
+            case 0x07:
+                fn_8009C5B0(VI_GM_1_0);
+                break;
+            case 0x08:
+                fn_8009C5B0(VI_GM_0_8);
+                break;
+            case 0x09:
+                fn_8009C5B0(VI_GM_0_6);
+                break;
+            case 0x0A:
+                fn_8009C5B0(VI_GM_0_4);
+                break;
+            case 0x0B:
+                fn_8009C5B0(VI_GM_0_6);
+                break;
+            case 0x0C:
+                fn_8009C5B0(VI_GM_0_8);
+                break;
+            case 0x0D:
+                fn_8009C5B0(VI_GM_1_0);
+                break;
+            case 0x0E:
+                fn_8009C5B0(VI_GM_0_8);
+                break;
+            case 0x0F:
+                fn_8009C5B0(VI_GM_0_6);
+                break;
+            case 0x10:
+                fn_8009C5B0(VI_GM_0_4);
+                break;
+            case 0x11:
+                fn_8009C5B0(VI_GM_0_6);
+                break;
+            case 0x12:
+                fn_8009C5B0(VI_GM_0_8);
+                break;
+            case 0x13:
+                fn_8009C5B0(VI_GM_1_0);
+                break;
+            case 0x3C:
+                if (gpSystem->eTypeROM == NKTJ) {
+                    if (cpuFindFunction(pCPU, 0x802B2E7C, &pFunction) && !fn_8003F330(pCPU, pFunction)) {
+                        return false;
+                    }
+                } else if (gpSystem->eTypeROM == NKTE) {
+                    if (cpuFindFunction(pCPU, 0x802B2EBC, &pFunction) && !fn_8003F330(pCPU, pFunction)) {
+                        return false;
+                    }
+                } else if (gpSystem->eTypeROM == NKTP) {
+                    if (cpuFindFunction(pCPU, 0x802B2F5C, &pFunction) && !fn_8003F330(pCPU, pFunction)) {
+                        return false;
+                    }
+                }
+                pFrame->bPauseThisFrame &= ~0xFF;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return true;
+}
+
 static inline void CopyCFB(u16* srcP) {
     GXSetTexCopySrc(0, 0, GC_FRAME_WIDTH, GC_FRAME_HEIGHT);
     GXSetTexCopyDst(N64_FRAME_WIDTH, N64_FRAME_HEIGHT, GX_TF_RGB565, GX_TRUE);
@@ -2876,7 +2960,42 @@ bool frameSetColor(Frame* pFrame, FrameColorType eType, u32 nRGBA) {
     return true;
 }
 
-// fn_80052174
+void fn_80052174(Frame* pFrame) {
+    GXColor color;
+
+    frameDrawSetup2D(pFrame);
+    GXSetZMode(GX_ENABLE, GX_ALWAYS, GX_ENABLE);
+    GXSetZCompLoc(GX_TRUE);
+    GXSetColorUpdate(GX_DISABLE);
+    GXSetAlphaUpdate(GX_DISABLE);
+    GXSetNumTevStages(1);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    color.r = 255;
+    color.g = 0;
+    color.b = 0;
+    color.a = 255;
+    GXSetTevColor(GX_TEVREG0, color);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_C0);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR_NULL);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(0.0, 0.0, -1001.0);
+    GXPosition3f32(N64_FRAME_WIDTH, 0.0, -1001.0);
+    GXPosition3f32(N64_FRAME_WIDTH, N64_FRAME_HEIGHT, -1001.0);
+    GXPosition3f32(0.0, N64_FRAME_HEIGHT, -1001.0);
+    GXEnd();
+
+    GXSetColorUpdate(GX_ENABLE);
+    GXSetAlphaUpdate(GX_ENABLE);
+}
 
 bool frameBeginOK(Frame* pFrame) {
     if (gbFrameValid) {
