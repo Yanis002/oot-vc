@@ -52,15 +52,6 @@ static inline bool frameGetMatrixHint(Frame* pFrame, u32 nAddress, s32* piHint);
 static bool frameResetCache(void);
 static bool frameSetupCache(void);
 
-//! TODO: inline not inlining??
-#define frameDrawReset_inline(pFrame, flag) {                       \
-    pFrame->nFlag |= flag;                                          \
-    pFrame->aDraw[0] = (FrameDrawFunc)frameDrawLine_Setup;          \
-    pFrame->aDraw[1] = (FrameDrawFunc)frameDrawTriangle_Setup;      \
-    pFrame->aDraw[2] = (FrameDrawFunc)frameDrawRectFill_Setup;      \
-    pFrame->aDraw[3] = (FrameDrawFunc)frameDrawRectTexture_Setup;   \
-}
-
 _XL_OBJECTTYPE gClassFrame = {
     "Frame",
     sizeof(Frame),
@@ -83,9 +74,7 @@ GXTexCoordID ganNameTexCoord[] = {
     GX_TEXCOORD0, GX_TEXCOORD1, GX_TEXCOORD2, GX_TEXCOORD3, GX_TEXCOORD4, GX_TEXCOORD5, GX_TEXCOORD6, GX_TEXCOORD7,
 };
 
-s32 lbl_80172710[] = {
-    190, 190, 190, 0
-};
+s32 lbl_80172710[] = {190, 190, 190, 0};
 
 s32 sCommandCodes_1679[] = {
     0xF5500000, 0x07080200, 0xE6000000, 0x00000000, 0xF3000000, 0x073BF01A, 0xE7000000, 0x00000000,
@@ -236,6 +225,7 @@ static u32 line_1582[N64_FRAME_WIDTH / 4][4][4];
 static u16 line_1606[N64_FRAME_WIDTH / 4][4][4];
 static u16 line_1630[N64_FRAME_WIDTH / 4][4][4];
 static GXTexObj sFrameObj_1647;
+static GXTexObj lbl_801A1680;
 static GXTexObj sFrameObj_1660;
 static GXTexObj frameObj_1663;
 static GXTexObj frameObj_1673;
@@ -770,7 +760,7 @@ static inline void fn_8004A020_inline(s32 index) {
     }
 }
 
-s32 fn_8004A020(Frame *pFrame) {
+s32 fn_8004A020(Frame* pFrame) {
     GXColor sp8;
 
     if (lbl_80172710[0] != 255 || lbl_80172710[1] != 255 || lbl_80172710[2] != 255) {
@@ -809,8 +799,8 @@ s32 fn_8004A020(Frame *pFrame) {
         }
 
         pFrame->nMode = 0;
-        pFrame->nModeVtx = -1U;
-        frameDrawReset_inline(pFrame, 0x47F2D);
+        pFrame->nModeVtx = -1;
+        frameDrawReset(pFrame, 0x47F2D);
     }
     return 1;
 }
@@ -1163,7 +1153,64 @@ void ZeldaGreyScaleConvert(Frame* pFrame) {
     frameDrawReset(pFrame, 0x47F2D);
 }
 
-// fn_8004B198
+void fn_8004B198(Frame* pFrame, void* pBuffer) {
+    GXColor color;
+    Mtx matrix;
+    f32 x1;
+    f32 y1;
+    f32 x0;
+    f32 y0;
+
+    color.r = 255;
+    color.g = 255;
+    color.b = 255;
+    color.a = 255;
+    frameDrawSetup2D(pFrame);
+    GXSetNumTevStages(1);
+    GXSetNumChans(0);
+    GXSetNumTexGens(1);
+    GXSetTevColor(GX_TEVREG0, color);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_C0, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+    GXSetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
+    GXSetZCompLoc(GX_TRUE);
+    PSMTXIdentity(matrix);
+    GXLoadTexMtxImm(matrix, 0x1E, GX_MTX2x4);
+    GXInitTexObj(&lbl_801A1680, pBuffer, N64_FRAME_WIDTH, N64_FRAME_HEIGHT, GX_TF_RGB565, GX_CLAMP, GX_CLAMP,
+                 GX_DISABLE);
+    GXInitTexObjLOD(&lbl_801A1680, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXLoadTexObj(&lbl_801A1680, GX_TEXMAP0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+
+    x0 = 0.0f;
+    y0 = 1.0f;
+    x1 = N64_FRAME_WIDTH;
+    y1 = N64_FRAME_HEIGHT;
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(x0, x0, 0.0f);
+    GXTexCoord2f32(x0, x0);
+    GXPosition3f32(x1, x0, 0.0f);
+    GXTexCoord2f32(y0, x0);
+    GXPosition3f32(x1, y1, 0.0f);
+    GXTexCoord2f32(y0, y0);
+    GXPosition3f32(x0, y1, 0.0f);
+    GXTexCoord2f32(x0, y0);
+    GXEnd();
+
+    pFrame->nMode = 0;
+    pFrame->nModeVtx = -1;
+    frameDrawReset(pFrame, 0x47F2D);
+    return;
+}
 
 //! TODO: make sCommandCodes a static variable in the function
 bool frameHackTIMG_Zelda(Frame* pFrame, u64** pnGBI, u32* pnCommandLo, u32* pnCommandHi) {
@@ -3352,7 +3399,11 @@ static inline bool frameTransposeMatrix(Mtx44 matrixTarget, Mtx44 matrixSource) 
 }
 
 bool frameDrawReset(Frame* pFrame, s32 nFlag) {
-    frameDrawReset_inline(pFrame, nFlag);
+    pFrame->nFlag |= nFlag;
+    pFrame->aDraw[0] = (FrameDrawFunc)frameDrawLine_Setup;
+    pFrame->aDraw[1] = (FrameDrawFunc)frameDrawTriangle_Setup;
+    pFrame->aDraw[2] = (FrameDrawFunc)frameDrawRectFill_Setup;
+    pFrame->aDraw[3] = (FrameDrawFunc)frameDrawRectTexture_Setup;
     return true;
 }
 
