@@ -3369,6 +3369,34 @@ bool frameLoadTexturePack(Frame* pFrame, const char* szFileName) {
     return true;
 }
 
+bool fn_8005329C(Frame* pFrame, s32 r, s32 g, s32 b) {
+    if (r < 0) {
+        r = 0;
+    }
+    if (r > 255) {
+        r = 255;
+    }
+
+    if (g < 0) {
+        g = 0;
+    }
+    if (g > 255) {
+        g = 255;
+    }
+
+    if (b < 0) {
+        b = 0;
+    }
+    if (b > 255) {
+        b = 255;
+    }
+
+    lbl_80172710[0] = r;
+    lbl_80172710[1] = g;
+    lbl_80172710[2] = b;
+    return true;
+}
+
 static inline bool frameEvent_UnknownInline(Frame* pFrame) {
     if (!fn_8005F5F4(SYSTEM_HELP(gpSystem), &pFrame->aPixelData, 0x30300000, &frameSetupCache)) {
         return false;
