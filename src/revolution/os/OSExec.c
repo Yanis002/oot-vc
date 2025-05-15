@@ -22,6 +22,7 @@ typedef void (*AppLoaderCallback)(appInitCallback*, appGetNextCallback*, appGetE
 extern u32 BOOT_REGION_START AT_ADDRESS(0x812FDFF0);
 extern u32 BOOT_REGION_END AT_ADDRESS(0x812FDFEC);
 extern u8 OS_REBOOT_BOOL AT_ADDRESS(0x800030E2); // unknown function, set to true by __OSReboot
+s32 __OSAppLoaderOffset AT_ADDRESS(0x800030F4);
 
 #define MENU_TITLE_ID 0x0000000100000002
 #define TICKET_VIEW_SIZE 0xD8
@@ -40,6 +41,9 @@ static void Run(register void* ptr) NO_INLINE;
 static s32 _ES_InitLib(s32* fd);
 static s32 _ES_GetTicketViews(s32* fd, u64 tid, void* pViews, u32* count);
 static s32 _ES_LaunchTitle(s32* fd, u64 tid, void* pViews) NO_INLINE;
+
+static AppLoaderStruct* LoadApploader();
+static void* LoadDol(const OSExecParams* params, AppLoaderCallback getInterface);
 
 static inline s32 _ES_InitLib(s32* fd) {
     s32 result;
@@ -118,8 +122,14 @@ void __OSGetExecParams(OSExecParams* out) {
     }
 }
 
+void __OSSetExecParams(const OSExecParams* params, OSExecParams* addr) {
+    memcpy(addr, params, sizeof(OSExecParams));
+    OS_DOL_EXEC_PARAMS = addr;
+}
+
+void __OSSetPrepared(bool prepared) { Prepared = prepared; }
+
 void __OSLaunchMenu(void) {
-    // This makes me feel sick
     s32 result;
     void* pviews = &views;
     u32 count = 1;
@@ -150,6 +160,198 @@ void __OSLaunchMenu(void) {
 
     while (true) {
         ;
+    }
+}
+
+static inline s32 _ES_GetTitleId(s32* fd, u64* tidOut) {
+    s32 result;
+    u64* pTid;
+    // TODO: Hacky solution
+    u8 tidWork[256] ATTRIBUTE_ALIGN(32);
+    u8 vectorWork[32] ATTRIBUTE_ALIGN(32);
+    IPCIOVector* pVectors = (IPCIOVector*)vectorWork;
+
+    // Cast is necessary
+    if (*fd < 0 || tidOut == ((void*)NULL)) {
+        return -1017;
+    }
+
+    pTid = (u64*)tidWork;
+    pVectors[0].base = pTid;
+    pVectors[0].length = sizeof(u64);
+
+    result = IOS_Ioctlv(*fd, ES_IOCTLV_GET_TITLE_ID, 0, 1, pVectors);
+    if (result == IPC_RESULT_OK) {
+        *tidOut = *pTid;
+    }
+
+    return result;
+}
+
+void __OSRelaunchTitle(void) {
+    s32 result;
+    void* pviews = &views;
+    u32 count = 1;
+    s32 fd = -1;
+    u64 tid;
+
+    if (_ES_InitLib(&fd) != IPC_RESULT_OK) {
+        return;
+    }
+
+    if (_ES_GetTitleId(&fd, &tid) != IPC_RESULT_OK) {
+        return;
+    }
+
+    result = _ES_GetTicketViews(&fd, MENU_TITLE_ID, NULL, &count);
+    if (count != 1 || result != IPC_RESULT_OK) {
+        return;
+    }
+
+    if (_ES_GetTicketViews(&fd, MENU_TITLE_ID, pviews, &count) != IPC_RESULT_OK) {
+        return;
+    }
+
+    if (_ES_LaunchTitle(&fd, MENU_TITLE_ID, pviews) != IPC_RESULT_OK) {
+        return;
+    }
+
+    while (true) {
+        ;
+    }
+}
+
+static inline void ReadDisc(void* addr, s32 length, s32 offset) {
+    DVDCommandBlock block;
+
+    DVDReadAbsAsyncPrio(&block, addr, length, offset, NULL, 0);
+
+    while (DVDGetCommandBlockStatus(&block) != 0) {
+        if (DVDGetCommandBlockStatus(&block) > 2 || DVDGetCommandBlockStatus(&block) < 0) {
+            __OSLaunchMenu();
+        }
+    }
+}
+
+static inline int GetApploaderPosition(void) {
+    static s32 apploaderPosition;
+    u32* tgcHeader;
+    s32 apploaderOffsetInTGC;
+
+    if (apploaderPosition != 0) {
+        return apploaderPosition;
+    }
+
+    if (__OSAppLoaderOffset != 0) {
+        tgcHeader = OSAllocFromMEM1ArenaLo(0x40, 32);
+        ReadDisc(tgcHeader, 0x40, __OSAppLoaderOffset);
+        apploaderOffsetInTGC = tgcHeader[14];
+        apploaderPosition = (__OSAppLoaderOffset + apploaderOffsetInTGC) >> 2;
+    } else {
+        apploaderPosition = 0x910;
+    }
+    return apploaderPosition;
+}
+
+static inline AppLoaderStruct* LoadApploader(void) {
+    AppLoaderStruct* header;
+
+    header = OSAllocFromMEM1ArenaLo(sizeof(AppLoaderStruct), 32);
+    ReadDisc(header, sizeof(AppLoaderStruct), GetApploaderPosition());
+    ReadDisc((void*)0x81200000, OSRoundUp32B(header->size), GetApploaderPosition() + 0x20);
+    ICInvalidateRange((void*)0x81200000, OSRoundUp32B(header->size));
+
+    return header;
+}
+
+static inline bool IsNewApploader(AppLoaderStruct* header) {
+    return strncmp(header->date, "2004/02/01", 10) > 0 ? true : false;
+}
+
+static inline void* LoadDol(const OSExecParams* params, AppLoaderCallback getInterface) {
+    appInitCallback appInit;
+    appGetNextCallback appGetNext;
+    appGetEntryCallback appGetEntry;
+    void* addr;
+    u32 length;
+    u32 offset;
+    OSExecParams* paramsWork;
+
+    getInterface(&appInit, &appGetNext, &appGetEntry);
+    paramsWork = (OSExecParams*)OSAllocFromMEM1ArenaLo(sizeof(OSExecParams), 1);
+    __OSSetExecParams(params, paramsWork);
+    appInit((void (*)(char*))OSReport);
+    OSSetArenaLo(paramsWork);
+
+    while (appGetNext(&addr, &length, &offset) != 0) {
+        ReadDisc(addr, length, offset);
+    }
+
+    return appGetEntry();
+}
+
+static inline void StartDol(const OSExecParams* params, void* entry) {
+    OSExecParams* paramsWork = OSAllocFromMEM1ArenaLo(sizeof(OSExecParams), 1);
+
+    __OSSetExecParams(params, paramsWork);
+    PI_HW_REGS[9] = 7;
+
+    OSDisableInterrupts();
+    Run(entry);
+}
+
+extern void fn_8008CBBC(void);
+
+void __OSBootDolSimple(u32 doloffset, u32 restartCode, void* regionStart, void* regionEnd, bool argsUseDefault,
+                       s32 argc, char** argv) {
+    OSExecParams* params;
+    void* dolEntry;
+    AppLoaderStruct* header;
+
+    OSDisableInterrupts();
+    params = (OSExecParams*)OSAllocFromMEM1ArenaLo(sizeof(OSExecParams), 1);
+    params->valid = true;
+    params->restartCode = restartCode;
+    params->regionStart = regionStart;
+    params->regionEnd = regionEnd;
+    params->argsUseDefault = argsUseDefault;
+
+    if (!argsUseDefault) {
+        params->argsAddr = OSAllocFromMEM1ArenaLo(0x2000, 1);
+        PackArgs(params->argsAddr, argc, argv);
+    }
+
+    DVDInit();
+    DVDSetAutoInvalidation(true);
+    DVDResume();
+    __OSSetPrepared(false);
+    __DVDPrepareResetAsync(Callback);
+    __OSMaskInterrupts(0xFFFFFFF0);
+    __OSUnmaskInterrupts(0x10);
+    OSEnableInterrupts();
+
+    while (Prepared != true) {}
+    fn_8008CBBC();
+    header = LoadApploader();
+
+    if (IsNewApploader(header)) {
+        if (doloffset == 0xFFFFFFFF) {
+            doloffset = (GetApploaderPosition() + 0x20) + header->size;
+        }
+
+        params->bootDol = doloffset;
+        dolEntry = LoadDol(params, (AppLoaderCallback)header->entry);
+        StartDol(params, dolEntry);
+    } else {
+        BOOT_REGION_START = (u32)regionStart;
+        BOOT_REGION_END = (u32)regionEnd;
+        OS_REBOOT_BOOL = true;
+
+        ReadDisc((void*)0x81330000, OSRoundUp32B(header->rebootSize), (GetApploaderPosition() + 0x20) + header->size);
+        ICInvalidateRange((void*)0x81330000, OSRoundUp32B(header->rebootSize));
+        OSDisableInterrupts();
+        ICFlashInvalidate();
+        Run((void*)0x81330000);
     }
 }
 
