@@ -4,7 +4,7 @@
 #include "emulator/flash.h"
 #include "emulator/frame.h"
 #include "emulator/rom.h"
-#include "emulator/store.h"
+#include "emulator/storeRVL.h"
 #include "emulator/system.h"
 #include "emulator/xlFileRVL.h"
 #include "emulator/xlHeap.h"
@@ -39,7 +39,23 @@ extern u32 lbl_80200654;
 extern u32 lbl_801FF7DC;
 #endif
 
-void fn_80007020(void) {
+static void simulatorDEMOSwapBuffers(void) {
+#if IS_OOT
+    if ((void*)DemoCurrentBuffer == (void*)DemoFrameBuffer1) {
+        DemoCurrentBuffer = DemoFrameBuffer2;
+    } else {
+        DemoCurrentBuffer = DemoFrameBuffer1;
+    }
+#elif IS_MM
+    lbl_80200654++;
+
+    if (lbl_80200654 >= lbl_801FF7DC) {
+        lbl_80200654 = 0;
+    }
+#endif
+}
+
+void simulatorDEMODoneRender(void) {
 #if IS_OOT || IS_MT
     SYSTEM_FRAME(gpSystem)->nMode = 0;
     SYSTEM_FRAME(gpSystem)->nModeVtx = -1;
@@ -53,20 +69,7 @@ void fn_80007020(void) {
     VISetNextFrameBuffer(DemoCurrentBuffer);
     VIFlush();
     VIWaitForRetrace();
-
-#if IS_OOT
-    if (DemoCurrentBuffer == DemoFrameBuffer1) {
-        DemoCurrentBuffer = DemoFrameBuffer2;
-    } else {
-        DemoCurrentBuffer = DemoFrameBuffer1;
-    }
-#elif IS_MM
-    lbl_80200654++;
-
-    if (lbl_80200654 >= lbl_801FF7DC) {
-        lbl_80200654 = 0;
-    }
-#endif
+    simulatorDEMOSwapBuffers();
 }
 
 #if IS_OOT
@@ -160,11 +163,11 @@ static bool simulatorParseArguments(void) {
 
     while (iArgument < xlCoreGetArgumentCount()) {
         xlCoreGetArgument(iArgument, &szText);
-        iArgument += 1;
+        iArgument++;
         if (szText[0] == '-' || szText[0] == '/' || szText[0] == '\\') {
             if (szText[2] == '\0') {
                 xlCoreGetArgument(iArgument, &szValue);
-                iArgument += 1;
+                iArgument++;
             } else {
                 szValue = &szText[2];
             }
@@ -327,7 +330,7 @@ bool xlMain(void) {
 #endif
 
 #if IS_OOT
-    VISetBlack(1);
+    VISetBlack(true);
     VIFlush();
     VIWaitForRetrace();
 

@@ -14,9 +14,18 @@
 
 import argparse
 import sys
+import glob
 from pathlib import Path
 from typing import Any, Dict, List
-from tools.project import *
+
+from tools.project import (
+    Object,
+    ProgressCategory,
+    ProjectConfig,
+    calculate_progress,
+    generate_build,
+    is_windows,
+)
 
 ### Script's arguments
 
@@ -32,6 +41,11 @@ parser.add_argument(
     "--non-matching",
     action="store_true",
     help="create non-matching build for modding",
+)
+parser.add_argument(
+    "--no-asm-processor",
+    action="store_true",
+    help="disable asm_processor for progress calculation",
 )
 parser.add_argument(
     "--build-dir",
@@ -100,7 +114,12 @@ args = parser.parse_args()
 
 config = ProjectConfig()
 
-# Only configure versions for which content1.app exists
+
+# Only configure versions for which an orig file exists
+def version_exists(version: str) -> bool:
+    return glob.glob(str(Path("orig") / version / "*")) != []
+
+
 ALL_VERSIONS = [
     "oot-j",
     "oot-u",
@@ -112,14 +131,21 @@ ALL_VERSIONS = [
 config.versions = [
     version
     for version in ALL_VERSIONS
-    if (Path("orig") / version / "content1.app").exists()
+    if version_exists(version)
 ]
+
+if not config.versions:
+    sys.exit("Error: no orig files found for any version")
+
 if "oot-j" in config.versions:
     config.default_version = "oot-j"
+else:
+    # Use the earliest version as default
+    config.default_version = config.versions[0]
 
 config.warn_missing_config = True
 config.warn_missing_source = False
-config.progress_all = False
+config.progress_all = True
 
 config.build_dir = args.build_dir
 config.dtk_path = args.dtk
@@ -129,6 +155,7 @@ config.compilers_path = args.compilers
 config.generate_map = args.map
 config.sjiswrap_path = args.sjiswrap
 config.non_matching = args.non_matching
+config.asm_processor = not args.no_asm_processor
 
 if not is_windows():
     config.wrapper = args.wrapper
@@ -139,10 +166,10 @@ if args.no_asm:
 ### Tool versions
 
 config.binutils_tag = "2.42-1"
-config.compilers_tag = "20231018"
-config.dtk_tag = "v0.9.2"
-config.objdiff_tag = "v2.0.0-beta.5"
-config.sjiswrap_tag = "v1.1.1"
+config.compilers_tag = "20240706"
+config.dtk_tag = "v1.4.1"
+config.objdiff_tag = "v2.7.1"
+config.sjiswrap_tag = "v1.2.0"
 config.wibo_tag = "0.6.11"
 config.linker_version = "GC/3.0a5"
 
@@ -175,6 +202,7 @@ cflags_base = [
     "-sym on",
     "-i include",
     "-i libc",
+    "-i src",
 ]
 
 if config.non_matching:
@@ -198,8 +226,8 @@ def EmulatorLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
         "mw_versions": compilers_gc,
-        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-enc SJIS"],
-        "host": False,
+        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-enc SJIS", "-ipa file"],
+        "progress_category": "emulator",
         "objects": objects,
     }
 
@@ -208,7 +236,7 @@ def RevolutionLib(lib_name: str, objects: List[Object], cpp_exceptions: str = "o
         "lib": lib_name,
         "mw_version": "GC/3.0a5",
         "cflags": [*cflags_base, f"-Cpp_exceptions {cpp_exceptions}", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract off"],
-        "host": False,
+        "progress_category": "revolution",
         "objects": objects,
     }
 
@@ -216,8 +244,17 @@ def LibC(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
         "mw_version": "GC/3.0a3",
-        "cflags": [*cflags_base, "-Cpp_exceptions on", "-O4,p", "-rostr", "-use_lmw_stmw on", "-lang c"],
-        "host": False,
+        "cflags": [*cflags_base, "-Cpp_exceptions on", "-O4,p", "-ipa file", "-rostr", "-use_lmw_stmw on", "-lang c", "-fp_contract off"],
+        "progress_category": "libc",
+        "objects": objects,
+    }
+
+def MathLibC(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
+    return {
+        "lib": lib_name,
+        "mw_version": "GC/3.0a3",
+        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-rostr", "-use_lmw_stmw on", "-lang c", "-fp_contract off"],
+        "progress_category": "libc",
         "objects": objects,
     }
 
@@ -226,7 +263,7 @@ def RuntimeLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
         "lib": lib_name,
         "mw_version": "GC/3.0a3",
         "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-rostr", "-use_lmw_stmw on", "-enc SJIS"],
-        "host": False,
+        "progress_category": "runtime",
         "objects": objects,
     }
 
@@ -234,20 +271,21 @@ def MetroTRKLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
         "mw_version": "GC/2.7",
-        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-rostr", "-use_lmw_stmw on", "-lang c"],
-        "host": False,
+        "cflags": [*cflags_base, "-Cpp_exceptions off", "-O4,p", "-rostr", "-use_lmw_stmw on", "-lang c", "-inline on,deferred", "-func_align 4", "-sdata 0", "-sdata2 0"],
+        "progress_category": "metrotrk",
         "objects": objects,
     }
+
 
 ### Link order
 
 # Not matching for any version
 NotLinked: List[str] = []
 
-# Matching for all versions
+# Linked for all versions
 Linked = config.versions
 
-# Matching for specific versions
+# Linked for specific versions
 def LinkedFor(*versions):
     return versions
 
@@ -275,15 +313,15 @@ config.libs = [
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/_frameGCNcc.c"),
             Object(NotLinked, "emulator/_buildtev.c"),
             Object(NotLinked, "emulator/frame.c"),
-            Object(NotLinked, "emulator/library.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/library.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/codeRVL.c"),
             Object(NotLinked, "emulator/code_800821FC.c"),
             Object(NotLinked, "emulator/code_80083508.c"),
             Object(NotLinked, "emulator/helpRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/soundRVL.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/video.c"),
-            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/store.c", extra_cflags=["-ipa file"]),
-            Object(NotLinked, "emulator/controller.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/storeRVL.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/controller.c", mw_version="GC/3.0a5.2"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "emulator/errordisplay.c"),
             Object(NotLinked, "emulator/banner.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e", "mm-j"), "emulator/stringtable.c"),
@@ -322,7 +360,7 @@ config.libs = [
     RevolutionLib(
         "os",
         [
-            Object(NotLinked, "revolution/os/OS.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/os/OS.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/os/OSAlarm.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/os/OSAlloc.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/os/OSArena.c"),
@@ -412,7 +450,7 @@ config.libs = [
     RevolutionLib(
         "dvd",
         [
-            Object(NotLinked, "revolution/dvd/dvdfs.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/dvd/dvdfs.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/dvd/dvd.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/dvd/dvdqueue.c"),
             Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/dvd/dvderror.c"),
@@ -499,9 +537,15 @@ config.libs = [
         ]
     ),
     RevolutionLib(
+        "wenc",
+        [
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/wenc/wenc.c"),
+        ]
+    ),
+    RevolutionLib(
         "arc",
         [
-            Object(NotLinked, "revolution/arc/arc.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "revolution/arc/arc.c"),
         ]
     ),
     RevolutionLib(
@@ -619,100 +663,117 @@ config.libs = [
         "libc",
         [
             Object(NotLinked, "libc/alloc.c"),
-            Object(NotLinked, "libc/ansi_files.c"),
-            Object(NotLinked, "libc/ansi_fp.c"),
-            Object(NotLinked, "libc/arith.c"),
-            Object(NotLinked, "libc/bsearch.c"),
-            Object(NotLinked, "libc/buffer_io.c"),
-            Object(NotLinked, "libc/direct_io.c"),
-            Object(NotLinked, "libc/file_io.c"),
-            Object(NotLinked, "libc/file_pos.c"),
-            Object(NotLinked, "libc/mbstring.c"),
-            Object(NotLinked, "libc/mem.c"),
-            Object(NotLinked, "libc/mem_funcs.c"),
-            Object(NotLinked, "libc/misc_io.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/ansi_files.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/ansi_fp.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/arith.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/bsearch.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/buffer_io.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/direct_io.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/file_io.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/file_pos.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/mbstring.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/mem.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/mem_funcs.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math_api.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/misc_io.c"),
             Object(NotLinked, "libc/printf.c"),
-            Object(NotLinked, "libc/qsort.c"),
-            Object(NotLinked, "libc/rand.c"),
-            Object(NotLinked, "libc/scanf.c"),
-            Object(NotLinked, "libc/signal.c"),
-            Object(NotLinked, "libc/string.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/qsort.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/rand.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/scanf.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/signal.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/string.c"),
             Object(NotLinked, "libc/strtold.c"),
-            Object(NotLinked, "libc/strtoul.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/strtoul.c"),
             Object(NotLinked, "libc/time.c"),
-            Object(NotLinked, "libc/wstring.c"),
-            Object(NotLinked, "libc/wchar_io.c"),
-            Object(NotLinked, "libc/sysenv.c"),
-            Object(NotLinked, "libc/uart_console_io.c"),
-            Object(NotLinked, "libc/abort_exit_ppc_eabi.c"),
-            Object(NotLinked, "libc/extras.c"),
-            Object(NotLinked, "libc/e_acos.c"),
-            Object(NotLinked, "libc/e_asin.c"),
-            Object(NotLinked, "libc/e_atan2.c"),
-            Object(NotLinked, "libc/e_exp.c"),
-            Object(NotLinked, "libc/e_fmod.c"),
-            Object(NotLinked, "libc/e_log.c"),
-            Object(NotLinked, "libc/e_log10.c"),
-            Object(NotLinked, "libc/e_pow.c"),
-            Object(NotLinked, "libc/e_rem_pio2.c"),
-            Object(NotLinked, "libc/k_cos.c"),
-            Object(NotLinked, "libc/k_rem_pio2.c"),
-            Object(NotLinked, "libc/k_sin.c"),
-            Object(NotLinked, "libc/k_tan.c"),
-            Object(NotLinked, "libc/s_atan.c"),
-            Object(NotLinked, "libc/s_ceil.c"),
-            Object(NotLinked, "libc/s_copysign.c"),
-            Object(NotLinked, "libc/s_cos.c"),
-            Object(NotLinked, "libc/s_floor.c"),
-            Object(NotLinked, "libc/s_frexp.c"),
-            Object(NotLinked, "libc/s_ldexp.c"),
-            Object(NotLinked, "libc/s_sin.c"),
-            Object(NotLinked, "libc/s_tan.c"),
-            Object(NotLinked, "libc/w_acos.c"),
-            Object(NotLinked, "libc/w_asin.c"),
-            Object(NotLinked, "libc/w_atan2.c"),
-            Object(NotLinked, "libc/w_exp.c"),
-            Object(NotLinked, "libc/w_fmod.c"),
-            Object(NotLinked, "libc/w_log.c"),
-            Object(NotLinked, "libc/w_log10f.c"),
-            Object(NotLinked, "libc/w_pow.c"),
-            Object(NotLinked, "libc/e_sqrt.c"),
-            Object(NotLinked, "libc/math_ppc.c"),
-            Object(NotLinked, "libc/w_sqrt.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/wstring.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/wchar_io.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/sysenv.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/uart_console_io.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/abort_exit_ppc_eabi.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/extras.c"),
+        ]
+    ),
+    MathLibC(
+        "libm",
+        [
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_acos.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_asin.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_atan2.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_exp.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_fmod.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_log.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_log10.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_pow.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_rem_pio2.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/k_cos.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/k_rem_pio2.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/k_sin.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/k_tan.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_atan.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_ceil.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_copysign.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_cos.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_floor.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_frexp.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_ldexp.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_sin.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/s_tan.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_acos.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_asin.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_atan2.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_exp.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_fmod.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_log.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_log10f.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_pow.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/e_sqrt.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/math_ppc.c"),
+            Object(LinkedFor("oot-j", "oot-u", "oot-e"), "libc/math/w_sqrt.c"),
         ]
     ),
     MetroTRKLib(
         "metrotrk",
         [
-            Object(NotLinked, "metrotrk/mainloop.c"),
-            Object(NotLinked, "metrotrk/nubevent.c"),
-            Object(NotLinked, "metrotrk/nubinit.c"),
-            Object(NotLinked, "metrotrk/msg.c"),
-            Object(NotLinked, "metrotrk/msgbuf.c"),
-            Object(NotLinked, "metrotrk/serpoll.c"),
-            Object(NotLinked, "metrotrk/usr_put.c"),
-            Object(NotLinked, "metrotrk/dispatch.c"),
-            Object(NotLinked, "metrotrk/msghndlr.c"),
-            Object(NotLinked, "metrotrk/support.c"),
-            Object(NotLinked, "metrotrk/mutex_TRK.c"),
-            Object(NotLinked, "metrotrk/notify.c"),
-            Object(NotLinked, "metrotrk/flush_cache.c"),
-            Object(NotLinked, "metrotrk/mem_TRK.c"),
-            Object(NotLinked, "metrotrk/targimpl.c"),
-            Object(NotLinked, "metrotrk/targsupp.c"),
-            Object(NotLinked, "metrotrk/mpc_7xx_603e.c"),
-            Object(NotLinked, "metrotrk/mslsupp.c"),
-            Object(NotLinked, "metrotrk/dolphin_trk.c"),
-            Object(NotLinked, "metrotrk/main_TRK.c"),
-            Object(NotLinked, "metrotrk/dolphin_trk_glue.c"),
-            Object(NotLinked, "metrotrk/targcont.c"),
-            Object(NotLinked, "metrotrk/code_8016A0EC.c"),
-            Object(NotLinked, "metrotrk/cc_udp.c"),
-            Object(NotLinked, "metrotrk/cc_gdev.c"),
-            Object(NotLinked, "metrotrk/CircleBuffer.c"),
-            Object(NotLinked, "metrotrk/MWCriticalSection_gc.cpp"),
+            Object(Linked, "metrotrk/mainloop.c"),
+            Object(Linked, "metrotrk/nubevent.c"),
+            Object(Linked, "metrotrk/nubinit.c"),
+            Object(Linked, "metrotrk/msg.c"),
+            Object(Linked, "metrotrk/msgbuf.c"),
+            Object(Linked, "metrotrk/serpoll.c", extra_cflags=["-sdata 8"]),
+            Object(Linked, "metrotrk/usr_put.c"),
+            Object(Linked, "metrotrk/dispatch.c"),
+            Object(Linked, "metrotrk/msghndlr.c"),
+            Object(Linked, "metrotrk/support.c"),
+            Object(Linked, "metrotrk/mutex_TRK.c"),
+            Object(Linked, "metrotrk/notify.c"),
+            Object(Linked, "metrotrk/flush_cache.c"),
+            Object(Linked, "metrotrk/mem_TRK.c"),
+            Object(Linked, "metrotrk/string_TRK.c"),
+            Object(Linked, "metrotrk/targimpl.c"),
+            Object(Linked, "metrotrk/targsupp.c", extra_cflags=["-func_align 16"]),
+            Object(Linked, "metrotrk/mpc_7xx_603e.c"),
+            Object(Linked, "metrotrk/mslsupp.c"),
+            Object(Linked, "metrotrk/dolphin_trk.c"),
+            Object(Linked, "metrotrk/main_TRK.c"),
+            Object(Linked, "metrotrk/dolphin_trk_glue.c"),
+            Object(Linked, "metrotrk/targcont.c"),
+            Object(Linked, "metrotrk/target_options.c"),
+            Object(Linked, "metrotrk/cc_udp.c"),
+            Object(Linked, "metrotrk/cc_gdev.c", extra_cflags=["-sdata 8"]),
+            Object(Linked, "metrotrk/CircleBuffer.c"),
+            Object(Linked, "metrotrk/MWCriticalSection_gc.c"),
         ]
     )
+]
+
+# Optional extra categories for progress tracking
+# Adjust as desired for your project
+config.progress_categories = [
+    ProgressCategory("emulator", "Emulator"),
+    ProgressCategory("revolution", "Revolution SDK"),
+    ProgressCategory("libc", "Libc"),
+    ProgressCategory("runtime", "Runtime"),
+    ProgressCategory("metrotrk", "MetroTRK"),
 ]
 
 ### Execute mode

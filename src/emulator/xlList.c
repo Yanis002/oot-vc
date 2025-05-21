@@ -28,7 +28,6 @@ bool xlListMake(tXL_LIST** ppList, s32 nItemSize) {
         return true;
     }
 
-    PAD_STACK();
     return false;
 }
 

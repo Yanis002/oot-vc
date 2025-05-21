@@ -5,6 +5,7 @@
 #include "emulator/system.h"
 #include "emulator/xlObject.h"
 #include "macros.h"
+#include "revolution/kpad/KPAD.h"
 #include "revolution/pad.h"
 #include "revolution/types.h"
 
@@ -17,6 +18,11 @@ typedef enum ControllerStickAxis {
     AXIS_Y = 1,
     AXIS_MAX = 2
 } ControllerStickAxis;
+
+typedef struct struct_801C7DC8 {
+    /* 0x000 */ KPADStatus status[KPAD_MAX_CONTROLLERS];
+    /* 0x220 */ u8 pad[0x330];
+} struct_801C7DC8; // size = 0x550
 
 typedef struct ControllerThread {
     /* 0x000 */ OSThread thread;
@@ -44,13 +50,19 @@ typedef struct Controller {
 #if IS_MM
     /*  N/A  0x090 */ u8 pad1[0x10];
 #endif
-    /* 0x07C 0x0A0 */ s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
-    /* 0x09C 0x0B0 */ s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
-    /* 0x0BC 0x0D0 */ s32 unk_BC[PAD_MAX_CONTROLLERS];
-    /* 0x0CC 0x0E0 */ s32 unk_CC[PAD_MAX_CONTROLLERS];
+    /* 0x07C 0x0A0 */ volatile s32 stickLeft[PAD_MAX_CONTROLLERS][AXIS_MAX];
+    /* 0x09C 0x0B0 */ volatile s32 stickRight[PAD_MAX_CONTROLLERS][AXIS_MAX];
+
+    //! TODO: fake match?
+    /* 0x0BC 0x0D0 */ union {
+        s32 unk_BC[PAD_MAX_CONTROLLERS];
+        volatile s32 vunk_BC[PAD_MAX_CONTROLLERS];
+    };
+
+    /* 0x0CC 0x0E0 */ volatile s32 unk_CC[PAD_MAX_CONTROLLERS];
     /* 0x0DC 0x0F0 */ u32 controllerConfiguration[PAD_MAX_CONTROLLERS][GCN_BTN_COUNT];
     /* 0x21C 0x250 */ ErrorIndex iString;
-    /* 0x220 0x254 */ s32 unk_220;
+    /* 0x220 0x254 */ volatile s32 unk_220;
     /* 0x224 0x258 */ s32 unk_224;
     /* 0x228 0x25C */ u32 unk_228[PAD_MAX_CONTROLLERS];
     /* 0x238 0x26C */ u32 unk_238[PAD_MAX_CONTROLLERS];
@@ -61,6 +73,10 @@ typedef struct Controller {
 } Controller; // size = 0x290 ; 0x2C8
 
 s32 fn_80062028(EDString* pSTString);
+bool simulatorDetectController(Controller* pController, s32 arg1);
+bool fn_80062C18(Controller* pController, s32 iController, s32* pnButton, s32* arg3, s32* pnStickLeftX,
+                 s32* pnStickLeftY, s32* pnStickRightX, s32* pnStickRightY);
+bool fn_80062CE4(Controller* pController, s32 iController, bool bUnknown);
 bool simulatorSetControllerMap(Controller* pController, s32 channel, u32* mapData);
 // bool simulatorCopyControllerMap(Controller* pController, u32* mapDataOutput, u32* mapDataInput);
 bool fn_80062E5C(Controller* pController, s32, s32*) NO_INLINE;
