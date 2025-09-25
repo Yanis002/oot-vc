@@ -83,6 +83,11 @@
 #define NW4HBMWarningMessage_Line(line_, ...)             NW4HBMCheckMessage_FileLine(__FILE__,   line_ , false, __VA_ARGS__)
 #define NW4HBMWarningMessage(...)                         NW4HBMCheckMessage_FileLine(__FILE__, __LINE__, false, __VA_ARGS__)
 
+#define NW4HBMAssertWarningMessage_FileLine(expr_, file_, line_, ...)  NW4HBMCheckMessage_FileLine(  file_ ,   line_ , expr_, __VA_ARGS__)
+#define NW4HBMAssertWarningMessage_File(expr_, file_,  ...)             NW4HBMCheckMessage_FileLine(  file_ , __LINE__, expr_, __VA_ARGS__)
+#define NW4HBMAssertWarningMessage_Line(expr_, line_,  ...)             NW4HBMCheckMessage_FileLine(__FILE__,   line_ , expr_, __VA_ARGS__)
+#define NW4HBMAssertWarningMessage(expr_, ...)                          NW4HBMCheckMessage_FileLine(__FILE__, __LINE__, expr_, __VA_ARGS__)
+
 #define NW4HBMWarning_FileLine(file_, line_)              NW4HBMCheck_FileLine(  file_ ,   line_ , false)
 #define NW4HBMWarning_File(file_)                         NW4HBMCheck_FileLine(  file_ , __LINE__, false)
 #define NW4HBMWarning_Line(line_)                         NW4HBMCheck_FileLine(__FILE__,   line_ , false)
@@ -103,6 +108,21 @@
 #define NW4HBMAlign32_2_File(expr_, file_)              NW4HBMAssertMessage_FileLine(  file_ , __LINE__, ((u32)expr_ & 0x1F) ? 0 : 1, "NW4HBM:Alignment Error(0x%x)\n" #expr_ " must be aligned to 32 bytes boundary.", expr_)
 #define NW4HBMAlign32_2_Line(expr_, line_)              NW4HBMAssertMessage_FileLine(__FILE__,   line_ , ((u32)expr_ & 0x1F) ? 0 : 1, "NW4HBM:Alignment Error(0x%x)\n" #expr_ " must be aligned to 32 bytes boundary.", expr_)
 #define NW4HBMAlign32_2(expr_)                          NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, ((u32)expr_ & 0x1F) ? 0 : 1, "NW4HBM:Alignment Error(0x%x)\n" #expr_ " must be aligned to 32 bytes boundary.", expr_)
+
+// Generic align
+// Aligned
+#define NW4HBM_IS_ALIGNED_(x, align)	(((unsigned long)(x) & ((align) - 1)) == 0) // just redefine instead of pulling in <macros.h>
+
+#define NW4HBMAssertAligned_FileLine(file_, line_, val_, align_)								NW4HBMAssertMessage_FileLine(  file_ ,   line_ , NW4HBM_IS_ALIGNED_(val_, align_), "NW4HBM:Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+#define NW4HBMAssertAligned_File(file_, val_, align_)											NW4HBMAssertMessage_FileLine(  file_ , __LINE__, NW4HBM_IS_ALIGNED_(val_, align_), "NW4HBM:Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+#define NW4HBMAssertAligned_Line(line_, val_, align_)											NW4HBMAssertMessage_FileLine(__FILE__,   line_ , NW4HBM_IS_ALIGNED_(val_, align_), "NW4HBM:Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+#define NW4HBMAssertAligned(val_, align_)														NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, NW4HBM_IS_ALIGNED_(val_, align_), "NW4HBM:Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+
+#define NW4HBMAssertHeaderAligned_FileLine(file_, line_, val_, align_)						NW4HBMAssertMessage_FileLine(  file_ ,   line_ , NW4HBM_IS_ALIGNED_(val_, align_),      "Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+#define NW4HBMAssertHeaderAligned_File(file_, val_, align_)									NW4HBMAssertMessage_FileLine(  file_ , __LINE__, NW4HBM_IS_ALIGNED_(val_, align_),      "Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+#define NW4HBMAssertHeaderAligned_Line(line_, val_, align_)									NW4HBMAssertMessage_FileLine(__FILE__,   line_ , NW4HBM_IS_ALIGNED_(val_, align_),      "Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+#define NW4HBMAssertHeaderAligned(val_, align_)												NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, NW4HBM_IS_ALIGNED_(val_, align_),      "Alignment Error(0x%x)\n" #val_ " must be aligned to " #align_ " bytes boundary.", val_)
+
 
 /* Extended asserts */
 
@@ -155,6 +175,29 @@
 #define NW4HBMAssertHeaderRangeValue_Line(var_, minValue_, maxValue_, line_)               NW4HBMAssertMessage_FileLine(__FILE__,   line_ , var_ >= minValue_ && var_ <= maxValue_, #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
 #define NW4HBMAssertHeaderRangeValue(var_, minValue_, maxValue_)                           NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, var_ >= minValue_ && var_ <= maxValue_, #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
 
+// ClampedLValue
+#define NW4HBMAssertClampedLValue_FileLine(file_, line_, var_, minValue_, maxValue_)            NW4HBMAssertMessage_FileLine(  file_ ,   line_ , (var_) >= (minValue_) && (var_) < (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertClampedLValue_File(file_, var_, minValue_, maxValue_)                        NW4HBMAssertMessage_FileLine(  file_ , __LINE__, (var_) >= (minValue_) && (var_) < (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertClampedLValue_Line(line_, var_, minValue_, maxValue_)                        NW4HBMAssertMessage_FileLine(__FILE__,   line_ , (var_) >= (minValue_) && (var_) < (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertClampedLValue(var_, minValue_, maxValue_)                                    NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, (var_) >= (minValue_) && (var_) < (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+
+#define NW4HBMAssertHeaderClampedLValue_FileLine(file_, line_, var_, minValue_, maxValue_)    NW4HBMAssertMessage_FileLine(  file_ ,   line_ , (var_) >= (minValue_) && (var_) < (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertHeaderClampedLValue_File(var_, minValue_, maxValue_, file_)               NW4HBMAssertMessage_FileLine(  file_ , __LINE__, (var_) >= (minValue_) && (var_) < (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertHeaderClampedLValue_Line(var_, minValue_, maxValue_, line_)               NW4HBMAssertMessage_FileLine(__FILE__,   line_ , (var_) >= (minValue_) && (var_) < (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertHeaderClampedLValue(var_, minValue_, maxValue_)                           NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, (var_) >= (minValue_) && (var_) < (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+
+// ClampedLRValue
+#define NW4HBMAssertClampedLRValue_FileLine(file_, line_, var_, minValue_, maxValue_)       NW4HBMAssertMessage_FileLine(  file_ ,   line_ , (var_) >= (minValue_) && (var_) <= (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertClampedLRValue_File(var_, minValue_, maxValue_, file_)                  NW4HBMAssertMessage_FileLine(  file_ , __LINE__, (var_) >= (minValue_) && (var_) <= (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertClampedLRValue_Line(var_, minValue_, maxValue_, line_)                  NW4HBMAssertMessage_FileLine(__FILE__,   line_ , (var_) >= (minValue_) && (var_) <= (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertClampedLRValue(var_, minValue_, maxValue_)                              NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, (var_) >= (minValue_) && (var_) <= (maxValue_), "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+
+#define NW4HBMAssertHeaderClampedLRValue_FileLine(file_, line_, var_, minValue_, maxValue_)    NW4HBMAssertMessage_FileLine(  file_ ,   line_ , (var_) >= (minValue_) && (var_) <= (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertHeaderClampedLRValue_File(var_, minValue_, maxValue_, file_)               NW4HBMAssertMessage_FileLine(  file_ , __LINE__, (var_) >= (minValue_) && (var_) <= (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertHeaderClampedLRValue_Line(var_, minValue_, maxValue_, line_)               NW4HBMAssertMessage_FileLine(__FILE__,   line_ , (var_) >= (minValue_) && (var_) <= (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+#define NW4HBMAssertHeaderClampedLRValue(var_, minValue_, maxValue_)                           NW4HBMAssertMessage_FileLine(__FILE__, __LINE__, (var_) >= (minValue_) && (var_) <= (maxValue_),         #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied.", (int)(var_), (int)(minValue_), (int)(maxValue_))
+
+
 /*******************************************************************************
  * Strings, for deadstripping
  */
@@ -177,6 +220,12 @@
 
 #define NW4HBMAssertMinimumValue_String(var_)         "NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " not satisfied."
 #define NW4HBMAssertHeaderMinimumValue_String(var_)   #var_ " is out of bounds(%d)\n%d <= " #var_ " not satisfied."
+
+#define NW4HBMAssertClampedLValue_String(var_)			"NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied."
+#define NW4HBMAssertHeaderClampedLValue_String(var_)		        #var_ " is out of bounds(%d)\n%d <= " #var_ " < %d not satisfied."
+
+#define NW4HBMAssertClampedLRValue_String(var_)			"NW4HBM:" #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied."
+#define NW4HBMAssertHeaderClampedLRValue_String(var_)		        #var_ " is out of bounds(%d)\n%d <= " #var_ " <= %d not satisfied."
 
 /*******************************************************************************
  * Declarations

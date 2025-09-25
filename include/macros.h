@@ -35,10 +35,30 @@ extern "C" {
 #ifndef __INTELLISENSE__
 #define NO_INLINE __attribute__((never_inline))
 #define ATTRIBUTE_UNUSED __attribute__((unused))
+#define ATTRIBUTE_FALLTHROUGH __attribute__((fallthrough))
+
+#ifndef ATTRIBUTE_ALIGN
+#define ATTRIBUTE_ALIGN(x) __attribute__((aligned(x)))
+#endif
 #else
 #define NO_INLINE
 #define ATTRIBUTE_UNUSED
+#define ATTRIBUTE_FALLTHROUGH
+
+#ifndef ATTRIBUTE_ALIGN
+#define ATTRIBUTE_ALIGN(x)
 #endif
+#endif
+
+#ifndef alignas
+# define alignas ATTRIBUTE_ALIGN
+#endif
+
+#ifndef static_assert
+# define static_assert __static_assert
+#endif
+
+#define ATTRIBUTE_MAYBE_UNUSED ATTRIBUTE_UNUSED /* only used in e.g. asserts */
 
 #define __CONCAT(x, y) x##y
 #define CONCAT(x, y) __CONCAT(x, y)

@@ -1,28 +1,37 @@
-#include "revolution/hbm/snd.hpp"
+#include "revolution/hbm/nw4hbm/snd/MmlSeqTrackAllocator.h"
+
+#include "revolution/types.h"
+
+#include "revolution/hbm/nw4hbm/snd/InstancePool.h"
+#include "revolution/hbm/nw4hbm/snd/MmlSeqTrack.h"
+#include "revolution/hbm/nw4hbm/snd/SeqTrack.h"
+
+#include "revolution/hbm/HBMAssert.hpp"
 
 namespace nw4hbm {
 namespace snd {
 namespace detail {
 
-SeqTrack* MmlSeqTrackAllocator::AllocTrack(SeqPlayer* pPlayer) {
-    MmlSeqTrack* pTrack = mTrackPool.Alloc();
+SeqTrack* MmlSeqTrackAllocator::AllocTrack(SeqPlayer* seqPlayer) {
+    MmlSeqTrack* track = mTrackPool.Alloc();
 
-    if (pTrack != nullptr) {
-        pTrack->SetSeqPlayer(pPlayer);
-        pTrack->SetMmlParser(mParser);
+    if (track != NULL) {
+        track->SetSeqPlayer(seqPlayer);
+        track->SetMmlParser(mParser);
     }
 
-    return pTrack;
+    return track;
 }
 
-void MmlSeqTrackAllocator::FreeTrack(SeqTrack* pTrack) {
-    pTrack->SetSeqPlayer(nullptr);
-    mTrackPool.Free(static_cast<MmlSeqTrack*>(pTrack));
+void MmlSeqTrackAllocator::FreeTrack(SeqTrack* track) {
+    NW4HBMAssertPointerNonnull_Line(track, 59);
+    track->SetSeqPlayer(nullptr);
+    mTrackPool.Free(static_cast<MmlSeqTrack*>(track));
 }
 
-u32 MmlSeqTrackAllocator::Create(void* pBuffer, u32 size) { return mTrackPool.Create(pBuffer, size); }
+u32 MmlSeqTrackAllocator::Create(void* buffer, u32 size) { return mTrackPool.Create(buffer, size); }
 
-void MmlSeqTrackAllocator::Destroy(void* pBuffer, u32 size) { mTrackPool.Destroy(pBuffer, size); }
+void MmlSeqTrackAllocator::Destroy(void* buffer, u32 size) { mTrackPool.Destroy(buffer, size); }
 
 } // namespace detail
 } // namespace snd

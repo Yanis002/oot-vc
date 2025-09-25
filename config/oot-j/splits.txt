@@ -933,29 +933,210 @@ revolution/hbm/nw4hbm/math/math_triangular.cpp:
 
 revolution/hbm/nw4hbm/snd/snd_AxManager.cpp:
 	.text       start:0x8011D104 end:0x8011EE24
+	.data       start:0x80198190 end:0x801983B8
+	.bss        start:0x80244760 end:0x8024B578
+	.sbss       start:0x8025DC20 end:0x8025DC28
+	.sdata2     start:0x8025E6F8 end:0x8025E710
 
 revolution/hbm/nw4hbm/snd/snd_AxVoice.cpp:
-	.text       start:0x8011EE24 end:0x80121C00
-
-revolution/hbm/nw4hbm/snd/snd_Voice.cpp:
-	.text       start:0x80121C00 end:0x80122A20
+	.text       start:0x8011EE24 end:0x80122A20
+	.data       start:0x801983B8 end:0x80198700
+	.sdata2     start:0x8025E710 end:0x8025E760
 
 revolution/hbm/nw4hbm/snd/snd_Bank.cpp:
 	.text       start:0x80122A20 end:0x80122C48
+	.sdata2     start:0x8025E760 end:0x8025E780
 
 revolution/hbm/nw4hbm/snd/snd_BankFile.cpp:
 	.text       start:0x80122C48 end:0x80123298
+	.data       start:0x80198700 end:0x801989A0
+	.sdata      start:0x8025CE68 end:0x8025CE88
+	.sdata2     start:0x8025E780 end:0x8025E788
 
 revolution/hbm/nw4hbm/snd/snd_BasicSound.cpp:
-	.text       start:0x80123298 end:0x8012454C
+	.text       start:0x80123298 end:0x801245A0
+	.ctors      start:0x8016A6FC end:0x8016A700
+	.data       start:0x801989A0 end:0x80198AF8
+	.sbss       start:0x8025DC28 end:0x8025DC30
+	.sdata2     start:0x8025E788 end:0x8025E798
 
 revolution/hbm/nw4hbm/snd/snd_Channel.cpp:
-	.text       start:0x8012454C end:0x80125680
-	.ctors      start:0x8016A6FC end:0x8016A700
+	.text       start:0x801245A0 end:0x80125834
+	.ctors      start:0x8016A700 end:0x8016A704
+	.data       start:0x80198AF8 end:0x80198D30
+	.bss        start:0x8024B578 end:0x8024F090
+	.sbss       start:0x8025DC30 end:0x8025DC38
+	.sdata2     start:0x8025E798 end:0x8025E7C0
 
-revolution/hbm/nw4hbm/snd/code_8011D104.cpp:
-	.text       start:0x80125680 end:0x8013CD64
-	.ctors      start:0x8016A700 end:0x8016A720
+revolution/hbm/nw4hbm/snd/snd_DisposeCallbackManager.cpp:
+	.text       start:0x80125834 end:0x80125CD4
+	.data       start:0x80198D30 end:0x80198D90
+	.bss        start:0x8024F090 end:0x8024F0A8
+	.sbss       start:0x8025DC38 end:0x8025DC40
+
+revolution/hbm/nw4hbm/snd/snd_DvdSoundArchive.cpp:
+	.text       start:0x80125CD4 end:0x80125D14
+
+revolution/hbm/nw4hbm/snd/snd_EnvGenerator.cpp:
+	.text       start:0x80125D14 end:0x80126324
+	.rodata     start:0x8016C8D0 end:0x8016CBD0
+	.data       start:0x80198D90 end:0x80198EE0
+	.sdata2     start:0x8025E7C0 end:0x8025E7F0
+
+revolution/hbm/nw4hbm/snd/snd_ExternalSoundPlayer.cpp:
+	.text       start:0x80126324 end:0x801264F0
+	.data       start:0x80198EE0 end:0x80198F70
+
+revolution/hbm/nw4hbm/snd/snd_FrameHeap.cpp:
+	.text       start:0x801264F0 end:0x80126F48
+	.data       start:0x80198F70 end:0x80199268
+
+revolution/hbm/nw4hbm/snd/snd_InstancePool.cpp:
+	.text       start:0x80126F48 end:0x801271F8
+	.data       start:0x80199268 end:0x801992B0
+
+revolution/hbm/nw4hbm/snd/snd_Lfo.cpp:
+	.text       start:0x801271F8 end:0x80127454
+	.rodata     start:0x8016CBD0 end:0x8016CBF8
+	.data       start:0x801992B0 end:0x801992F8
+	.sdata2     start:0x8025E7F0 end:0x8025E820
+
+revolution/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp:
+	.text       start:0x80127454 end:0x80127500
+
+revolution/hbm/nw4hbm/snd/snd_MidiSeqPlayer.cpp:
+	.text       start:0x80127500 end:0x8012759C
+
+revolution/hbm/nw4hbm/snd/snd_MidiSeqTrack.cpp:
+	.text       start:0x8012759C end:0x801275DC
+	.data       start:0x801992F8 end:0x80199308
+
+revolution/hbm/nw4hbm/snd/snd_MmlParser.cpp:
+	.text       start:0x801275DC end:0x80128710
+	.data       start:0x80199308 end:0x80199800
+	.sdata      start:0x8025CE88 end:0x8025CE98
+	.sbss       start:0x8025DC40 end:0x8025DC48
+	.sdata2     start:0x8025E820 end:0x8025E840
+
+revolution/hbm/nw4hbm/snd/snd_MmlSeqTrack.cpp:
+	.text       start:0x80128710 end:0x801287DC
+	.data       start:0x80199800 end:0x80199810
+
+revolution/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp:
+	.text       start:0x801287DC end:0x80128924
+	.data       start:0x80199810 end:0x80199870
+
+revolution/hbm/nw4hbm/snd/snd_NandSoundArchive.cpp:
+	.text       start:0x80128924 end:0x8012925C
+	.data       start:0x80199870 end:0x80199B68
+	.sbss       start:0x8025DC48 end:0x8025DC50
+
+revolution/hbm/nw4hbm/snd/snd_RemoteSpeaker.cpp:
+	.text       start:0x8012925C end:0x8012976C
+	.data       start:0x80199B98 end:0x80199C50
+
+revolution/hbm/nw4hbm/snd/snd_RemoteSpeakerManager.cpp:
+	.text       start:0x8012976C end:0x80129A44
+	.data       start:0x80199C50 end:0x80199D18
+	.bss        start:0x8024F0A8 end:0x8024F360
+	.sbss       start:0x8025DC50 end:0x8025DC58
+
+revolution/hbm/nw4hbm/snd/snd_SeqFile.cpp:
+	.text       start:0x80129A44 end:0x80129BF8
+
+revolution/hbm/nw4hbm/snd/snd_SeqPlayer.cpp:
+	.text       start:0x80129BF8 end:0x8012B558
+	.ctors      start:0x8016A704 end:0x8016A708
+
+revolution/hbm/nw4hbm/snd/snd_SeqSound.cpp:
+	.text       start:0x8012B558 end:0x8012BBD0
+	.ctors      start:0x8016A708 end:0x8016A70C
+
+revolution/hbm/nw4hbm/snd/snd_SeqSoundHandle.cpp:
+	.text       start:0x8012BBD0 end:0x8012BC08
+
+revolution/hbm/nw4hbm/snd/snd_SeqTrack.cpp:
+	.text       start:0x8012BC08 end:0x8012D444
+
+revolution/hbm/nw4hbm/snd/snd_SoundArchive.cpp:
+	.text       start:0x8012D444 end:0x8012DB48
+
+revolution/hbm/nw4hbm/snd/snd_SoundArchiveFile.cpp:
+	.text       start:0x8012DB48 end:0x8012EEC8
+
+revolution/hbm/nw4hbm/snd/snd_SoundArchiveLoader.cpp:
+	.text       start:0x8012EEC8 end:0x8012F870
+
+revolution/hbm/nw4hbm/snd/snd_SoundArchivePlayer.cpp:
+	.text       start:0x8012F870 end:0x80132F3C
+
+revolution/hbm/nw4hbm/snd/snd_SoundHandle.cpp:
+	.text       start:0x80132F3C end:0x80133008
+
+revolution/hbm/nw4hbm/snd/snd_SoundHeap.cpp:
+	.text       start:0x80133008 end:0x80133194
+
+revolution/hbm/nw4hbm/snd/snd_SoundPlayer.cpp:
+	.text       start:0x80133194 end:0x80134E90
+
+revolution/hbm/nw4hbm/snd/snd_SoundStartable.cpp:
+	.text       start:0x80134E90 end:0x80134EFC
+
+revolution/hbm/nw4hbm/snd/snd_SoundSystem.cpp:
+	.text       start:0x80134EFC end:0x801350E0
+
+revolution/hbm/nw4hbm/snd/snd_SoundThread.cpp:
+	.text       start:0x801350E0 end:0x80135880
+
+revolution/hbm/nw4hbm/snd/snd_StrmFile.cpp:
+	.text       start:0x80135880 end:0x80135F48
+
+revolution/hbm/nw4hbm/snd/snd_StrmPlayer.cpp:
+	.text       start:0x80135F48 end:0x801383AC
+
+revolution/hbm/nw4hbm/snd/code_801383AC.cpp:
+	.text       start:0x801383AC end:0x80138844
+	.ctors      start:0x8016A70C end:0x8016A710
+
+revolution/hbm/nw4hbm/snd/snd_StrmSound.cpp:
+	.text       start:0x80138844 end:0x80138B20
+	.ctors      start:0x8016A710 end:0x8016A714
+
+revolution/hbm/nw4hbm/snd/snd_StrmSoundHandle.cpp:
+	.text       start:0x80138B20 end:0x80138B58
+
+revolution/hbm/nw4hbm/snd/snd_TaskManager.cpp:
+	.text       start:0x80138B58 end:0x80139438
+
+revolution/hbm/nw4hbm/snd/snd_TaskThread.cpp:
+	.text       start:0x80139438 end:0x80139578
+
+revolution/hbm/nw4hbm/snd/snd_Util.cpp:
+	.text       start:0x80139578 end:0x80139914
+
+revolution/hbm/nw4hbm/snd/snd_WaveFile.cpp:
+	.text       start:0x80139914 end:0x80139B44
+
+revolution/hbm/nw4hbm/snd/snd_WavePlayer.cpp:
+	.text       start:0x80139B44 end:0x8013A708
+	.ctors      start:0x8016A714 end:0x8016A718
+
+revolution/hbm/nw4hbm/snd/snd_WaveSound.cpp:
+	.text       start:0x8013A708 end:0x8013AB8C
+	.ctors      start:0x8016A718 end:0x8016A71C
+
+revolution/hbm/nw4hbm/snd/snd_WaveSoundHandle.cpp:
+	.text       start:0x8013AB8C end:0x8013ABC4
+
+revolution/hbm/nw4hbm/snd/snd_WsdFile.cpp:
+	.text       start:0x8013ABC4 end:0x8013B060
+
+revolution/hbm/nw4hbm/snd/snd_WsdPlayer.cpp:
+	.text       start:0x8013B060 end:0x8013C0E4
+
+revolution/hbm/nw4hbm/snd/snd_WsdTrack.cpp:
+	.text       start:0x8013C0E4 end:0x8013CD64
+	.ctors      start:0x8016A71C end:0x8016A720
 
 revolution/hbm/nw4hbm/ut/ut_binaryFileFormat.cpp:
 	.text       start:0x8013CD64 end:0x8013CFBC

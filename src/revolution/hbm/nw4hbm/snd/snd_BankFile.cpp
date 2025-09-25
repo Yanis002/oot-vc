@@ -4,8 +4,6 @@
 namespace nw4hbm {
 namespace snd {
 namespace detail {
-
-// See BankFile::Region
 enum {
     DATATYPE_NONE = Util::DATATYPE_T0,
     DATATYPE_INSTPARAM = Util::DATATYPE_T1,
@@ -13,37 +11,49 @@ enum {
     DATATYPE_INDEXTABLE = Util::DATATYPE_T3,
 };
 
-bool BankFileReader::IsValidFileHeader(const void* pBankBin) {
-    const ut::BinaryFileHeader* pFileHeader = static_cast<const ut::BinaryFileHeader*>(pBankBin);
+bool BankFileReader::IsValidFileHeader(const void* bankData) {
+    const ut::BinaryFileHeader* fileHeader = static_cast<const ut::BinaryFileHeader*>(bankData);
+    NW4HBMAssert_Line(fileHeader->signature == BankFile::SIGNATURE_FILE, 54);
 
-    if (pFileHeader->signature != SIGNATURE) {
+    if (fileHeader->signature != BankFile::SIGNATURE_FILE) {
         return false;
     }
 
-    if (pFileHeader->version < NW4R_VERSION(1, 0)) {
+    NW4HBMAssertMessage_Line(fileHeader->version >= NW4HBM_VERSION(1, 0), 62,
+                             "bank file is not supported version.\n  please reconvert file using new version tools.\n");
+    if (fileHeader->version < NW4R_VERSION(1, 0)) {
         return false;
     }
 
-    if (pFileHeader->version > VERSION) {
+    NW4HBMAssertMessage_Line(fileHeader->version <= FILE_VERSION, 68,
+                             "bank file is not supported version.\n  please reconvert file using new version tools.\n");
+    if (fileHeader->version > FILE_VERSION) {
         return false;
     }
 
     return true;
 }
 
-BankFileReader::BankFileReader(const void* pBankBin) : mHeader(nullptr), mDataBlock(nullptr), mWaveBlock(nullptr) {
-    if (!IsValidFileHeader(pBankBin)) {
+BankFileReader::BankFileReader(const void* bankData) : mHeader(nullptr), mDataBlock(nullptr), mWaveBlock(nullptr) {
+    NW4HBMAssertPointerNonnull_Line(bankData, 88);
+
+    if (!IsValidFileHeader(bankData)) {
         return;
     }
 
-    mHeader = static_cast<const BankFile::Header*>(pBankBin);
+    mHeader = static_cast<const BankFile::Header*>(bankData);
 
     mDataBlock = static_cast<const BankFile::DataBlock*>(ut::AddOffsetToPtr(mHeader, mHeader->dataBlockOffset));
+    NW4HBMAssert_Line(mDataBlock->blockHeader.kind == BankFile::SIGNATURE_DATA_BLOCK, 97);
 
     mWaveBlock = static_cast<const BankFile::WaveBlock*>(ut::AddOffsetToPtr(mHeader, mHeader->waveBlockOffset));
+    NW4HBMAssert_Line(mWaveBlock->blockHeader.kind == BankFile::SIGNATURE_WAVE_BLOCK, 101);
 }
 
-bool BankFileReader::ReadInstInfo(InstInfo* pInfo, int prgNo, int key, int velocity) const {
+bool BankFileReader::ReadInstInfo(InstInfo* instInfo, int prgNo, int key, int velocity) const {
+    NW4HBMAssertPointerNonnull_Line(instInfo, 123);
+    NW4HBMAssertPointerNonnull_Line(mHeader, 124);
+
     if (mHeader == nullptr) {
         return false;
     }
@@ -52,78 +62,76 @@ bool BankFileReader::ReadInstInfo(InstInfo* pInfo, int prgNo, int key, int veloc
         return false;
     }
 
-    const BankFile::DataRegion* pRef = &mDataBlock->instTable.items[prgNo];
-    if (pRef->dataType == Util::DATATYPE_INVALID) {
+    const BankFile::DataRegion* ref = &mDataBlock->instTable.items[prgNo];
+    if (ref->dataType == Util::DATATYPE_INVALID) {
         return false;
     }
 
-    if (pRef->dataType != DATATYPE_INSTPARAM) {
-        pRef = GetReferenceToSubRegion(pRef, key);
-        if (pRef == nullptr) {
+    if (ref->dataType != DATATYPE_INSTPARAM) {
+        ref = GetReferenceToSubRegion(ref, key);
+        if (ref == nullptr) {
             return false;
         }
     }
 
-    if (pRef->dataType == Util::DATATYPE_INVALID) {
+    if (ref->dataType == Util::DATATYPE_INVALID) {
         return false;
     }
 
-    if (pRef->dataType != DATATYPE_INSTPARAM) {
-        pRef = GetReferenceToSubRegion(pRef, velocity);
-        if (pRef == nullptr) {
+    if (ref->dataType != DATATYPE_INSTPARAM) {
+        ref = GetReferenceToSubRegion(ref, velocity);
+        if (ref == nullptr) {
             return false;
         }
     }
 
-    if (pRef->dataType != DATATYPE_INSTPARAM) {
+    if (ref->dataType != DATATYPE_INSTPARAM) {
         return false;
     }
 
-    const BankFile::InstParam* pParam = Util::GetDataRefAddress1(*pRef, &mDataBlock->instTable);
+    const BankFile::InstParam* param = Util::GetDataRefAddress1(*ref, &mDataBlock->instTable);
 
-    if (pParam == nullptr) {
+    if (param == nullptr) {
         return false;
     }
 
-    if (pParam->waveIndex < 0) {
+    if (param->waveIndex < 0) {
         return false;
     }
 
-    pInfo->waveIndex = pParam->waveIndex;
-    pInfo->attack = pParam->attack;
-    pInfo->decay = pParam->decay;
-    pInfo->sustain = pParam->sustain;
-    pInfo->release = pParam->release;
-    pInfo->originalKey = pParam->originalKey;
-    pInfo->pan = pParam->pan;
+    instInfo->waveIndex = param->waveIndex;
+    instInfo->attack = param->attack;
+    instInfo->decay = param->decay;
+    instInfo->sustain = param->sustain;
+    instInfo->release = param->release;
+    instInfo->originalKey = param->originalKey;
+    instInfo->pan = param->pan;
 
-    if (mHeader->fileHeader.version >= VERSION) {
-        pInfo->volume = pParam->volume;
-        pInfo->tune = pParam->tune;
+    if (mHeader->fileHeader.version == FILE_VERSION) {
+        instInfo->volume = param->volume;
+        instInfo->tune = param->tune;
     } else {
-        pInfo->volume = 127;
-        pInfo->tune = 1.0f;
+        instInfo->volume = 127;
+        instInfo->tune = 1.0f;
     }
 
     return true;
 }
 
-const BankFile::DataRegion* BankFileReader::GetReferenceToSubRegion(const BankFile::DataRegion* pRef,
+const BankFile::DataRegion* BankFileReader::GetReferenceToSubRegion(const BankFile::DataRegion* ref,
                                                                     int splitKey) const {
     const BankFile::DataRegion* pSub = nullptr;
 
-    switch (pRef->dataType) {
+    switch (ref->dataType) {
         case DATATYPE_NONE: {
             break;
         }
-
         case DATATYPE_INSTPARAM: {
-            pSub = pRef;
+            pSub = ref;
             break;
         }
-
         case DATATYPE_RANGETABLE: {
-            const BankFile::RangeTable* pRangeTable = Util::GetDataRefAddress2(*pRef, &mDataBlock->instTable);
+            const BankFile::RangeTable* pRangeTable = Util::GetDataRefAddress2(*ref, &mDataBlock->instTable);
 
             if (pRangeTable == nullptr) {
                 return nullptr;
@@ -136,16 +144,15 @@ const BankFile::DataRegion* BankFileReader::GetReferenceToSubRegion(const BankFi
                 }
             }
 
-            const u8* pBase = reinterpret_cast<const u8*>(pRangeTable);
+            const u8* base = reinterpret_cast<const u8*>(pRangeTable);
             u32 refOffset = i * sizeof(BankFile::DataRegion);
             u32 refStart = ut::RoundUp<u32>(pRangeTable->tableSize + 1, 4);
 
-            pSub = reinterpret_cast<const BankFile::DataRegion*>(pBase + refOffset + refStart);
+            pSub = reinterpret_cast<const BankFile::DataRegion*>(base + refOffset + refStart);
             break;
         }
-
         case DATATYPE_INDEXTABLE: {
-            const BankFile::IndexTable* pIndexTable = Util::GetDataRefAddress3(*pRef, &mDataBlock->instTable);
+            const BankFile::IndexTable* pIndexTable = Util::GetDataRefAddress3(*ref, &mDataBlock->instTable);
 
             if (pIndexTable == nullptr) {
                 return nullptr;
@@ -155,8 +162,7 @@ const BankFile::DataRegion* BankFileReader::GetReferenceToSubRegion(const BankFi
                 return nullptr;
             }
 
-            pSub = reinterpret_cast<const BankFile::DataRegion*>(pIndexTable->ref + (splitKey - pIndexTable->min) *
-                                                                                        sizeof(BankFile::DataRegion));
+            pSub = reinterpret_cast<const BankFile::DataRegion*>(pIndexTable->ref + (splitKey - pIndexTable->min));
             break;
         }
     }
@@ -164,7 +170,9 @@ const BankFile::DataRegion* BankFileReader::GetReferenceToSubRegion(const BankFi
     return pSub;
 }
 
-bool BankFileReader::ReadWaveParam(WaveData* pData, int waveIndex, const void* pWaveAddr) const {
+bool BankFileReader::ReadWaveParam(WaveData* waveParam, int waveIndex, const void* waveAddr) const {
+    NW4HBMAssertPointerNonnull_Line(mHeader, 263);
+
     if (mHeader == nullptr) {
         return false;
     }
@@ -177,18 +185,16 @@ bool BankFileReader::ReadWaveParam(WaveData* pData, int waveIndex, const void* p
         return false;
     }
 
-    const BankFile::WaveRegion* pRef = &mWaveBlock->waveInfoTable.items[waveIndex];
+    const BankFile::WaveRegion* ref = &mWaveBlock->waveInfoTable.items[waveIndex];
+    const WaveFile::WaveInfo* info = Util::GetDataRefAddress0(*ref, &mWaveBlock->waveInfoTable);
 
-    const WaveFile::WaveInfo* pInfo = Util::GetDataRefAddress0(*pRef, &mWaveBlock->waveInfoTable);
-
-    if (pInfo == nullptr) {
+    if (info == nullptr) {
         return false;
     }
 
-    WaveFileReader wfr(pInfo);
-    return wfr.ReadWaveParam(pData, pWaveAddr);
+    WaveFileReader wfr(info);
+    return wfr.ReadWaveParam(waveParam, waveAddr);
 }
-
 } // namespace detail
 } // namespace snd
 } // namespace nw4hbm

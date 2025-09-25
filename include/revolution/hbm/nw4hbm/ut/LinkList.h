@@ -60,6 +60,7 @@ class LinkListImpl : private NonCopyable {
         // methods
       public:
         // cdtors
+        Iterator() : mPointer(nullptr) {}
         Iterator(LinkListNode* pNode) : mPointer(pNode) {}
 
         // operators
@@ -132,7 +133,7 @@ class LinkListImpl : private NonCopyable {
     Iterator Erase(Iterator itFirst, Iterator itLast);
 
     void Clear();
-    bool IsEmpty() { return mSize != 0; };
+    bool IsEmpty() const { return mSize == 0; };
     void SetPrev(LinkListNode* p, LinkListNode* pPrev);
     void SetNext(LinkListNode* p, LinkListNode* pNext);
     u32 GetSize() const { return mSize; }
@@ -167,6 +168,7 @@ template <typename T, int I> class LinkList : public detail::LinkListImpl {
         // methods
       public:
         // cdtors
+        Iterator() : it_(nullptr) {}
         Iterator(detail::LinkListImpl::Iterator it) : it_(it) {}
 
         // operators
@@ -241,7 +243,12 @@ template <typename T, int I> class LinkList : public detail::LinkListImpl {
 
         const T* operator->() const { return GetPointerFromNode(mIterator.operator->()); }
 
-        const T& operator*() const { return *this->operator->(); }
+        const T& operator*() const {
+            const T* p = this->operator->();
+            NW4HBMAssertPointerNonnull_Line(p, 0);
+
+            return *p;
+        }
 
         friend bool operator==(ConstIterator lhs, ConstIterator rhs) { return lhs.mIterator == rhs.mIterator; }
 
@@ -264,12 +271,28 @@ template <typename T, int I> class LinkList : public detail::LinkListImpl {
 
     Iterator Insert(Iterator it, T* p) { return LinkListImpl::Insert(it.it_, GetNodeFromPointer(p)); }
 
-    T& GetFront() { return *GetBeginIter(); }
-    const T& GetFront() const { return *GetBeginIter(); }
+    T& GetFront() {
+        NW4HBMAssert_Line(!IsEmpty(), 497);
+        return *GetBeginIter();
+    }
 
-    T& GetBack() { return *--GetEndIter(); }
-    const T& GetBack() const { return *--GetEndIter(); }
+    const T& GetFront() const {
+        NW4HBMAssert_Line(!IsEmpty(), 0);
+        return *GetBeginIter();
+    }
 
+    T& GetBack() {
+        NW4HBMAssert_Line(!IsEmpty(), 507);
+        return *--GetEndIter();
+    }
+
+    const T& GetBack() const {
+        NW4HBMAssert_Line(!IsEmpty(), 0);
+        return *--GetEndIter();
+    }
+
+    void PopFront() { Erase(GetBeginIter()); }
+    void PopBack() { Erase(--GetEndIter()); }
     void PushBack(T* p) { Insert(GetEndIter(), p); }
     Iterator Erase(Iterator it) { return LinkListImpl::Erase(it.it_); }
     Iterator Erase(T* p) { return LinkListImpl::Erase(GetNodeFromPointer(p)); }
@@ -286,7 +309,7 @@ template <typename T, int I> class LinkList : public detail::LinkListImpl {
     }
 
     static const T* GetPointerFromNode(const LinkListNode* p) {
-        NW4HBMAssertPointerNonnull_Line(p, 0);
+        NW4HBMAssertPointerNonnull_Line(p, 578);
         return reinterpret_cast<const T*>(reinterpret_cast<const char*>(p) - I);
     }
 

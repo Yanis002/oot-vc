@@ -2,7 +2,7 @@
 #define NW4R_SND_WAVE_FILE_H
 #include "revolution/types.h"
 
-#include "revolution/hbm/nw4hbm/snd/snd_AxVoice.hpp"
+#include "revolution/hbm/nw4hbm/snd/AxVoice.h"
 #include "revolution/hbm/nw4hbm/snd/snd_Types.hpp"
 
 #include "revolution/hbm/ut.hpp"
@@ -10,94 +10,77 @@
 namespace nw4hbm {
 namespace snd {
 namespace detail {
-
-/******************************************************************************
- *
- * RWAV binary layout
- *
- ******************************************************************************/
 namespace WaveFile {
-
-enum Format {
-    FORMAT_PCM8,
+typedef enum Format {
+    FORMAT_PCM8 = 0,
     FORMAT_PCM16,
     FORMAT_ADPCM
-};
+} Format;
 
-struct WaveInfo {
-    u8 format; // at 0x0
-    u8 loopFlag; // at 0x1
-    u8 numChannels; // at 0x2
-    u8 sampleRate24; // at 0x3
-    u16 sampleRate; // at 0x4
-    u16 PADDING_0x6; // at 0x6
-    u32 loopStart; // at 0x8
-    u32 loopEnd; // at 0xC
-    u32 channelInfoTableOffset; // at 0x10
-    u32 dataOffset; // at 0x14
-    u32 reserved; // at 0x18
-};
+typedef struct WaveInfo {
+    u8 format; // 0x00
+    u8 loopFlag; // 0x01
+    u8 numChannels; // 0x02
+    u8 sampleRate24; // 0x03
+    u16 sampleRate; // 0x04
+    u16 padding2; // 0x06
+    u32 loopStart; // 0x08
+    u32 loopEnd; // 0x0C
+    u32 channelInfoTableOffset; // 0x10
+    u32 dataOffset; // 0x14
+    u32 reserved; // 0x18
+} WaveInfo;
 
-struct WaveChannelInfo {
-    u32 channelDataOffset; // at 0x0
-    u32 adpcmOffset; // at 0x4
-    u32 volumeFrontLeft; // at 0x8
-    u32 volumeFrontRight; // at 0xC
-    u32 volumeRearLeft; // at 0x10
-    u32 volumeRearRight; // at 0x14
-    u32 reserved; // at 0x18
-};
+typedef struct WaveChannelInfo {
+    u32 channelDataOffset; // 0x00
+    u32 adpcmOffset; // 0x04
+    u32 volumeFrontLeft; // 0x08
+    u32 volumeFrontRight; // 0x0C
+    u32 volumeRearLeft; // 0x10
+    u32 volumeRearRight; // 0x14
+    u32 reserved; // 0x18
+} WaveChannelInfo;
+} // namespace WaveFile
 
-}; // namespace WaveFile
+typedef struct ChannelParam {
+    void* dataAddr; // 0x00
+    u32 volumeFrontLeft; // 0x04
+    u32 volumeFrontRight; // 0x08
+    u32 volumeRearLeft; // 0x0C
+    u32 volumeRearRight; // 0x10
+    AdpcmInfo adpcmInfo; // 0x14
+} ChannelParam;
 
-/******************************************************************************
- *
- * WaveFileReader
- *
- ******************************************************************************/
-struct ChannelParam {
-    void* dataAddr; // at 0x0
-    u32 volumeFrontLeft; // at 0x4
-    u32 volumeFrontRight; // at 0x8
-    u32 volumeRearLeft; // at 0xC
-    u32 volumeRearRight; // at 0x10
-    AdpcmInfo adpcmInfo; // at 0x14
-};
-
-struct WaveData {
-    u8 sampleFormat; // at 0x0
-    u8 loopFlag; // at 0x1
-    u8 numChannels; // at 0x2
-    u32 sampleRate; // at 0x4
-    u32 loopStart; // at 0x8
-    u32 loopEnd; // at 0xC
-    ChannelParam channelParam[CHANNEL_MAX]; // at 0x10
-};
+typedef struct WaveData {
+    u8 format; // 0x00
+    u8 loopFlag; // 0x01
+    u8 numChannels; // 0x02
+    int sampleRate; // 0x04
+    u32 loopStart; // 0x08
+    u32 loopEnd; // 0x0C
+    ChannelParam channelParam[CHANNEL_MAX]; // 0x10
+} WaveData;
 
 class WaveFileReader {
   public:
-    explicit WaveFileReader(const WaveFile::WaveInfo* pWaveInfo);
+    explicit WaveFileReader(const WaveFile::WaveInfo* waveInfo);
 
-    bool ReadWaveParam(WaveData* pWaveData, const void* pWaveAddr) const;
-
-    static AxVoice::Format GetAxVoiceFormatFromWaveFileFormat(u32 format);
+    bool ReadWaveParam(WaveData* waveData, const void* waveAddr) const;
+    static AxVoice::Format WaveFormatToAxFormat(u32 format);
 
   private:
-    const WaveFile::WaveInfo* mWaveInfo; // at 0x0
+    const WaveFile::WaveInfo* mWaveInfo; // 0x00
 };
 
 inline AxVoice::Format WaveFormatToAxFormat(u32 format) {
     if (format == WaveFile::FORMAT_PCM16) {
         return AxVoice::FORMAT_PCM16;
     }
-
     if (format == WaveFile::FORMAT_PCM8) {
         return AxVoice::FORMAT_PCM8;
     }
-
     return AxVoice::FORMAT_ADPCM;
 }
-
 } // namespace detail
 } // namespace snd
 } // namespace nw4hbm
