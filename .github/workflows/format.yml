@@ -25,7 +25,9 @@ jobs:
 
     # Run formatter
     - name: Run clang-format
-      run: ./format
+      run: |
+        clang-format --version
+        ./format
 
     # Cancel if there's a diff
     - name: Check status
