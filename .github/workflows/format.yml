@@ -31,4 +31,4 @@ jobs:
 
     # Cancel if there's a diff
     - name: Check status
-      run: git diff --name-only --exit-code
+      run: git diff --exit-code
