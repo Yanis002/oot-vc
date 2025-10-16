@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 #if IS_MT
-#define ASSERT(cond, file, line)                            \
+#define VC_ASSERT(cond, file, line)                         \
     {                                                       \
         if ((cond)) {                                       \
             OSReport("SAFE Failed!, %s, %d\n", file, line); \
@@ -42,11 +42,11 @@ extern "C" {
         }                                                   \
     }
 #else
-#define ASSERT(cond, file, line) \
-    {                            \
-        if ((cond)) {            \
-            return false;        \
-        }                        \
+#define VC_ASSERT(cond, file, line) \
+    {                               \
+        if ((cond)) {               \
+            return false;           \
+        }                           \
     }
 #endif
 

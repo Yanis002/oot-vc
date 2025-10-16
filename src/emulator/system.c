@@ -24,6 +24,7 @@
 #include "emulator/vi.h"
 #include "emulator/video.h"
 #include "emulator/xlHeap.h"
+#include "emulator/storeRVL.h"
 #include "macros.h"
 #include "revolution/os.h"
 #include "revolution/vi.h"
@@ -325,8 +326,16 @@ u32 lbl_8016FEA0[] = {
 
 static SystemRomConfig gSystemRomConfigurationList;
 
-bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, void* pArgument) {
+extern _XL_OBJECTTYPE gClassEEPROM;
+
+#if IS_MM
+bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, void* pArgument, s32 param4)
+#else
+bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, void* pArgument)
+#endif
+{
     switch (eStorageDevice) {
+#if IS_OOT || IS_MT
         case SOT_PAK:
             if (!xlObjectMake(&pSystem->apObject[SOT_PAK], pArgument, &gClassPak)) {
                 return false;
@@ -336,12 +345,19 @@ bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, vo
                 return false;
             }
             break;
+#endif
         case SOT_SRAM:
             if (!xlObjectMake(&pSystem->apObject[SOT_SRAM], pArgument, &gClassSram)) {
                 return false;
             }
 
-            if (!cpuMapObject(SYSTEM_CPU(gpSystem), pSystem->apObject[SOT_SRAM], 0x08000000, 0x08007FFF, 0)) {
+#if IS_MM
+            if (SYSTEM_SRAM(pSystem)->pStore != NULL) {
+                SYSTEM_SRAM(pSystem)->pStore->unk_04 = param4;
+            }
+#endif
+
+            if (!cpuMapObject(SYSTEM_CPU(SYSTEM_PTR), pSystem->apObject[SOT_SRAM], 0x08000000, 0x08007FFF, 0)) {
                 return false;
             }
             break;
@@ -350,10 +366,28 @@ bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, vo
                 return false;
             }
 
-            if (!cpuMapObject(SYSTEM_CPU(gpSystem), pSystem->apObject[SOT_FLASH], 0x08000000, 0x0801FFFF, 0)) {
+#if IS_MM
+            if (SYSTEM_FLASH(pSystem)->pStore != NULL) {
+                SYSTEM_FLASH(pSystem)->pStore->unk_04 = param4;
+            }
+#endif
+
+            if (!cpuMapObject(SYSTEM_CPU(SYSTEM_PTR), pSystem->apObject[SOT_FLASH], 0x08000000, 0x0801FFFF, 0)) {
                 return false;
             }
             break;
+#if IS_MM
+        //! TODO: SOT_EEPROM and related headers?
+        case SOT_PAK:
+            if (!xlObjectMake(&pSystem->apObject[SOT_PAK], pArgument, &gClassEEPROM)) {
+                return false;
+            }
+
+            if (SYSTEM_PAK(pSystem)->pStore != NULL) {
+                SYSTEM_PAK(pSystem)->pStore->unk_04 = param4;
+            }
+            break;
+#endif
         default:
             return false;
     }
@@ -1278,13 +1312,17 @@ static bool systemSetupGameALL(System* pSystem) {
     Pif* pPIF;
     s32 defaultConfiguration;
 
-    s32 var_r25;
+    SystemObjectType var_r25;
     s32 var_r24;
     u32 var_r23;
 
+    pSystem->storageDevice = SOT_SRAM;
     pCPU = SYSTEM_CPU(gpSystem);
+    var_r25 = SOT_NONE;
     pROM = SYSTEM_ROM(gpSystem);
+    var_r24 = 0;
     pPIF = SYSTEM_PIF(gpSystem);
+    var_r23 = 0x17D7;
 
     if (!ramGetBuffer(SYSTEM_RAM(pSystem), (void**)&anMode, 0x300, NULL)) {
         return false;
@@ -1309,25 +1347,30 @@ static bool systemSetupGameALL(System* pSystem) {
     pSystem->unk_94 = 1;
 
     if (gSystemRomConfigurationList.storageDevice & 1) {
-        var_r25 = 0xC;
+        var_r25 = SOT_SRAM;
         var_r24 = 0x8000;
     } else if (gSystemRomConfigurationList.storageDevice & 2) {
-        var_r25 = 0xD;
+        var_r25 = SOT_FLASH;
         var_r24 = 0x40000;
     } else if (gSystemRomConfigurationList.storageDevice & 4) {
-        var_r25 = 0xE;
+        var_r25 = SOT_PAK;
         var_r24 = 0x200;
     } else if (gSystemRomConfigurationList.storageDevice & 8) {
-        var_r25 = 0xE;
+        var_r25 = SOT_PAK;
         var_r24 = 0x800;
     }
 
-    if ((var_r25 != -1) && (some_systemSetupGameRAM(pSystem, var_r25, var_r24, pSystem->unk_94) == 0)) {
+    if (var_r25 != SOT_NONE && !systemSetStorageDevice(pSystem, var_r25, (void*)var_r24, pSystem->unk_94)) {
         return false;
     }
 
     if (gpSystem->eTypeROM == NZSJ || gpSystem->eTypeROM == NZSE || gpSystem->eTypeROM == NZSP) {
-        pSystem->storageDevice = 5;
+        Frame* pFrame = SYSTEM_FRAME(pSystem); // temp_r5
+        Rsp* pRSP = SYSTEM_RSP(pSystem); // temp_r23
+
+        pSystem->storageDevice = SOT_ROM;
+
+        pRSP->nMode = 0;
 
         lbl_801FF810 = 2;
         lbl_801FF814 = lbl_80201508;
@@ -1391,7 +1434,7 @@ static bool systemSetupGameALL(System* pSystem) {
         }
 
         pCPU->nCompileFlag |= 0x1010;
-        fn_800818F0(gpSystem->apObject[20], 1);
+        fn_800818F0(SYSTEM_CONTROLLER(gpSystem), 1);
     } else if (!romGetCode(pROM, acCode)) {
         return false;
     }
@@ -1787,9 +1830,9 @@ static bool fn_8000A504(void) {
     s32 i;
 
     nAddress = gpSystem->cpuBlock.nAddress0;
-    nAddressEnd = (nAddress + gpSystem->cpuBlock.nSize) - 1;
+    nAddressEnd = (nAddress + gpSystem->cpuBlock.nSize) ;
 
-    if (!frameInvalidateCache(SYSTEM_FRAME(gpSystem), nAddress, nAddressEnd)) {
+    if (!frameInvalidateCache(SYSTEM_FRAME(gpSystem), nAddress, nAddressEnd-- - 1)) {
         return false;
     }
 

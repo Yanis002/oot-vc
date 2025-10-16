@@ -407,7 +407,17 @@ static bool pifGet32(Pif* pPIF, u32 nAddress, s32* pData) {
 
     if (nAddress < PIF_RAM_START) {
         *pData = *((s32*)pPIF->pROM + (nAddress >> 2));
-    } else {
+    }
+
+#if IS_MM
+    else if (nAddress == (PIF_RAM_START + 0x24)) {
+        *pData = 0;
+    } else if (nAddress == (PIF_RAM_START + 0x3C)) {
+        *pData = 0;
+    }
+#endif
+
+    else {
         *pData = *((s32*)pPIF->pROM + ((nAddress - PIF_RAM_START) >> 2));
     }
 

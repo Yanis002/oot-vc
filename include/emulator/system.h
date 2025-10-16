@@ -351,7 +351,11 @@ typedef struct SystemRomConfig {
 #define SYSTEM_VIDEO(pSystem) ((Video*)(((System*)(pSystem))->apObject[SOT_VIDEO]))
 #define SYSTEM_CONTROLLER(pSystem) ((Controller*)(((System*)(pSystem))->apObject[SOT_CONTROLLER]))
 
+#if IS_MM
+bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, void* pArgument, s32 param4) NO_INLINE;
+#else
 bool systemSetStorageDevice(System* pSystem, SystemObjectType eStorageDevice, void* pArgument) NO_INLINE;
+#endif
 bool systemCreateStorageDevice(System* pSystem, void* pArgument);
 bool fn_8000A6A4(System* pSystem, CpuBlock* pBlock);
 bool systemSetMode(System* pSystem, SystemMode eMode);

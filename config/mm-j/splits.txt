@@ -36,10 +36,10 @@ emulator/system.c:
 	.sdata      start:0x801FF818 end:0x801FF880
 
 emulator/cpu.c:
-	.text       start:0x80017568 end:0x8004F740
+	.text       start:0x80017568 end:0x8004F774
 
 emulator/pif.c:
-	.text       start:0x8004F740 end:0x800504E0
+	.text       start:0x8004F774 end:0x800504E0
 
 emulator/ram.c:
 	.text       start:0x800504E0 end:0x80050AFC

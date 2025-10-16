@@ -12,6 +12,9 @@ extern "C" {
 typedef struct Rdp {
     /* 0x00 */ s32 nBIST;
     /* 0x04 */ s32 nStatus;
+#if IS_MM
+    /* 0x08 */ void* pHost;
+#endif
     /* 0x0C */ s32 nModeTest;
     /* 0x10 */ s32 nDataTest;
     /* 0x14 */ s32 nAddressTest;

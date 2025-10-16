@@ -549,15 +549,17 @@ bool simulatorSetControllerMap(Controller* pController, s32 channel, u32* mapDat
     return true;
 }
 
-// bool simulatorCopyControllerMap(Controller* pController, u32* mapDataOutput, u32* mapDataInput) {
-//     s32 i;
+#if IS_OOT
+bool simulatorCopyControllerMap(Controller* pController, u32* mapDataOutput, u32* mapDataInput) {
+    s32 i;
 
-//     for (i = 0; i < GCN_BTN_COUNT; i++) {
-//         mapDataOutput[i] = mapDataInput[i];
-//     }
+    for (i = 0; i < GCN_BTN_COUNT; i++) {
+        mapDataOutput[i] = mapDataInput[i];
+    }
 
-//     return true;
-// }
+    return true;
+}
+#endif
 
 bool fn_80062E5C(Controller* pController, s32 iController, s32* pnInput) {
     s32 nButton;

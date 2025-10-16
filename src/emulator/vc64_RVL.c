@@ -37,6 +37,15 @@ bool gDVDResetToggle = false;
 
 extern u32 lbl_80200654;
 extern u32 lbl_801FF7DC;
+
+//! TODO: document these
+typedef struct struct_8017B1E0 {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ u16* unk_04[10];
+    /* 0x18 */ u8 pad_unk_18[0x40 - 0x18];
+} struct_8017B1E0; // size = 0x40
+
+extern struct_8017B1E0 lbl_8017B1E0;
 #endif
 
 static void simulatorDEMOSwapBuffers(void) {
@@ -60,7 +69,6 @@ void simulatorDEMODoneRender(void) {
     SYSTEM_FRAME(gpSystem)->nMode = 0;
     SYSTEM_FRAME(gpSystem)->nModeVtx = -1;
     frameDrawReset(SYSTEM_FRAME(gpSystem), 0x5FFED);
-#endif
 
     GXSetZMode(GX_ENABLE, GX_LEQUAL, GX_ENABLE);
     GXSetColorUpdate(GX_ENABLE);
@@ -70,6 +78,16 @@ void simulatorDEMODoneRender(void) {
     VIFlush();
     VIWaitForRetrace();
     simulatorDEMOSwapBuffers();
+#elif IS_MM
+    GXSetZMode(GX_ENABLE, GX_LEQUAL, GX_ENABLE);
+    GXSetColorUpdate(GX_ENABLE);
+    GXCopyDisp(lbl_8017B1E0.unk_04[lbl_80200654 * 2], GX_TRUE);
+    GXDrawDone();
+    VISetNextFrameBuffer(lbl_8017B1E0.unk_04[lbl_80200654 * 2]);
+    VIFlush();
+    VIWaitForRetrace();
+    simulatorDEMOSwapBuffers();
+#endif
 }
 
 #if IS_OOT
@@ -82,7 +100,7 @@ bool simulatorDVDRead(DVDFileInfo* pFileInfo, void* anData, s32 nSizeRead, s32 n
 #if IS_OOT || IS_MT
     return false;
 #elif IS_MM
-    fn_80083848();
+    __simulatorCNTReadNAND();
 
     if (callback != NULL) {
         callback(nSizeRead, NULL);
@@ -352,10 +370,10 @@ bool xlMain(void) {
     VIWaitForRetrace();
 
     xlCoreBeforeRender();
-    fn_80007020();
+    simulatorDEMODoneRender();
 
     xlCoreBeforeRender();
-    fn_80007020();
+    simulatorDEMODoneRender();
 
     VIWaitForRetrace();
     VISetBlack(false);

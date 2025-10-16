@@ -82,9 +82,9 @@ bool rdpParseGBI(Rdp* pRDP, u64** ppnGBI, RspUCodeType eTypeUCode) {
             }
 
             switch (gpSystem->eTypeROM) {
-                case 'CZLE':
-                case 'CZLJ':
-                case 'NZLP':
+                case CZLE:
+                case CZLJ:
+                case NZLP:
                     if (!frameHackCIMG_Zelda(pFrame, pBuffer, pnGBI, nCommandLo, nCommandHi)) {
                         return false;
                     }
@@ -118,9 +118,9 @@ bool rdpParseGBI(Rdp* pRDP, u64** ppnGBI, RspUCodeType eTypeUCode) {
             FrameBuffer* pBuffer = &pFrame->aBuffer[FBT_IMAGE];
 
             switch (gpSystem->eTypeROM) {
-                case 'CZLE':
-                case 'CZLJ':
-                case 'NZLP':
+                case CZLE:
+                case CZLJ:
+                case NZLP:
                     if (!frameHackTIMG_Zelda(pFrame, &pnGBI, &nCommandLo, &nCommandHi)) {
                         return false;
                     }
@@ -802,6 +802,9 @@ static bool rdpPut32(Rdp* pRDP, u32 nAddress, s32* pData) {
             break;
         case 0x04:
             pRDP->nAddress1 = *pData & 0xFFFFFF;
+#if IS_MM
+            xlObjectEvent(pRDP->pHost, 0x1000, (void*)10);
+#endif
             break;
         case 0x08:
             break;
@@ -810,9 +813,13 @@ static bool rdpPut32(Rdp* pRDP, u32 nAddress, s32* pData) {
             if (nData & 1) {
                 pRDP->nStatus &= ~1;
             }
+
+#if IS_OOT
             if (nData & 2) {
                 pRDP->nStatus |= 1;
             }
+#endif
+
             if (nData & 0x10) {
                 pRDP->nStatus &= ~0x4;
             }
@@ -943,25 +950,30 @@ bool rdpEvent(Rdp* pRDP, s32 nEvent, void* pArgument) {
     switch (nEvent) {
         case 2:
             pRDP->nStatus = 0;
+
+#if IS_MM
+            pRDP->pHost = pArgument;
+#endif
+
             break;
         case 0x1002:
             switch (((CpuDevice*)pArgument)->nType) {
                 case 0:
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), (CpuDevice*)pArgument, (Put8Func)rdpPut8,
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pRDP)), (CpuDevice*)pArgument, (Put8Func)rdpPut8,
                                          (Put16Func)rdpPut16, (Put32Func)rdpPut32, (Put64Func)rdpPut64)) {
                         return false;
                     }
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), (CpuDevice*)pArgument, (Get8Func)rdpGet8,
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pRDP)), (CpuDevice*)pArgument, (Get8Func)rdpGet8,
                                          (Get16Func)rdpGet16, (Get32Func)rdpGet32, (Get64Func)rdpGet64)) {
                         return false;
                     }
                     break;
                 case 1:
-                    if (!cpuSetDevicePut(SYSTEM_CPU(gpSystem), (CpuDevice*)pArgument, (Put8Func)rdpPutSpan8,
+                    if (!cpuSetDevicePut(SYSTEM_CPU(SYSTEM_PTR(pRDP)), (CpuDevice*)pArgument, (Put8Func)rdpPutSpan8,
                                          (Put16Func)rdpPutSpan16, (Put32Func)rdpPutSpan32, (Put64Func)rdpPutSpan64)) {
                         return false;
                     }
-                    if (!cpuSetDeviceGet(SYSTEM_CPU(gpSystem), (CpuDevice*)pArgument, (Get8Func)rdpGetSpan8,
+                    if (!cpuSetDeviceGet(SYSTEM_CPU(SYSTEM_PTR(pRDP)), (CpuDevice*)pArgument, (Get8Func)rdpGetSpan8,
                                          (Get16Func)rdpGetSpan16, (Get32Func)rdpGetSpan32, (Get64Func)rdpGetSpan64)) {
                         return false;
                     }
@@ -973,8 +985,10 @@ bool rdpEvent(Rdp* pRDP, s32 nEvent, void* pArgument) {
         case 3:
             break;
         case 0x1003:
+#if IS_OOT
         case 0x1004:
         case 0x1007:
+#endif
             break;
         default:
             return false;

@@ -59,7 +59,8 @@ bool flashTransferFLASH(Flash* pFLASH, s32 nOffsetRAM, s32 nOffsetFLASH, s32 nSi
     switch (pFLASH->flashCommand & 0xFF000000) {
         case 0xB4000000:
             for (i = 0; i < nSize; i++) {
-                pFLASH->flashBuffer[i] = ((char*)pTarget)[i];
+                char* target = ((char*)pTarget);
+                pFLASH->flashBuffer[i] = target[i];
             }
             break;
         case 0x0:
@@ -302,7 +303,11 @@ static inline bool flashEvent_UnknownInline(Flash* pFLASH, void* pArgument) {
         pArgument = (void*)0x4000;
     }
 
+#if IS_OOT
     pFLASH->nFlashSize = (u32)pArgument;
+#else
+    pFLASH->unk_00 = (u32)pArgument;
+#endif
 
     if (!fn_80061770((void**)&pFLASH->pStore, "EEP", gpSystem->eTypeROM, pArgument)) {
         return false;
