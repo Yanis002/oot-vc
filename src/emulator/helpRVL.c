@@ -30,6 +30,9 @@ extern void* fn_80083140(void);
 extern void fn_800888DC(void**);
 extern HBMControllerData lbl_801CA670;
 
+static void helpMenuResetCallback(void);
+static void helpMenuPowerCallback(void);
+
 typedef struct Rect {
     /* 0x0 */ f32 x0;
     /* 0x4 */ f32 y0;
@@ -37,34 +40,11 @@ typedef struct Rect {
     /* 0xC */ f32 y1;
 } Rect; // size = 0x10
 
-static s32 fn_8005E2D0(CNTHandleNAND* pHandle, char* szPath, void** ppBuffer, MEMAllocator* arg3, void* arg4);
-static void fn_8005E45C(GXTexObj* pTexObj, GXColor color);
-static void fn_8005E638(GXColor color);
-static void fn_8005E800(s32 param_1, s32 param_2, u16 param_3, u16 param_4, s32 param_5, u32 param_6);
-static void fn_8005EAFC(void);
-static void fn_8005EDFC(void);
-static void fn_8005F154(void);
-static void fn_8005F1A0(void);
-static bool fn_8005F1EC(void);
-static void fn_8005F1F4(HelpMenu* pHelpMenu);
-static bool fn_8005F6F4(HelpMenu* pHelpMenu, char* szFileName, s32** arg2, MEMAllocator* arg3) NO_INLINE;
-
-static inline bool fn_8005F7E4_UnknownInline(void);
-static inline void fn_8005EDFC_UnknownInline(GXColor color);
-static inline void fn_8005F1F4_UnknownInline1(NANDFileInfo* pFileInfo, void** ppBuffer, char* szPath);
-static inline void fn_8005F1F4_UnknownInline2(NANDFileInfo* pFileInfo, void** ppBuffer, char* szPath);
-static inline bool helpMenuAllocateHeap(HelpMenu* pHelpMenu);
-static inline bool helpMenuDestroyHeap(HelpMenu* pHelpMenu);
-static inline void helpMenuSetupRender();
-static inline void helpMenuUnknownControllerInline();
-static inline bool helpMenuHeapTake(HelpMenu* pHelpMenu);
-static inline bool helpMenuFree(HelpMenu* pHelpMenu);
-
 static MEMAllocator sMemAllocator1 = {0};
 static MEMAllocator sMemAllocator2 = {0};
 static char sWebsitePath[40] = {0};
 static struct_801C7D28 lbl_801C7D28 = {0};
-static struct_801C7D38 lbl_801C7D38 = {0};
+static HBMDataInfo sHBMDataInfo = {0};
 static CNTHandleNAND sHandleNAND;
 static GXTexObj sTexObj;
 
@@ -96,9 +76,8 @@ char* lbl_8025D0BC;
 u8 lbl_8025D0B8;
 
 GXColor lbl_8025C850[] = {255, 255, 255, 255};
-const GXColor lbl_8025DEEC = {255, 255, 255, 0};
 
-static s32 fn_8005E2D0(CNTHandleNAND* pHandle, char* szPath, void** ppBuffer, MEMAllocator* arg3, void* arg4) {
+static s32 helpMenuReadNAND(CNTHandleNAND* pHandle, char* szPath, void** ppBuffer, MEMAllocator* arg3, void* arg4) {
     CNTFileInfoNAND fileInfo;
     void* pNANDBuffer;
     s32 var_r31;
@@ -157,7 +136,7 @@ static s32 fn_8005E2D0(CNTHandleNAND* pHandle, char* szPath, void** ppBuffer, ME
     return var_r31;
 }
 
-static void fn_8005E45C(GXTexObj* pTexObj, GXColor color) {
+static void helpMenuSetupTexturedQuad(GXTexObj* pTexObj, GXColor color) {
     GXInvalidateVtxCache();
     GXInvalidateTexAll();
     GXClearVtxDesc();
@@ -187,7 +166,7 @@ static void fn_8005E45C(GXTexObj* pTexObj, GXColor color) {
     GXSetTevColor(GX_TEVREG0, color);
 }
 
-static void fn_8005E638(GXColor color) {
+static void helpMenuSetupColoredQuad(GXColor color) {
     GXInvalidateVtxCache();
     GXInvalidateTexAll();
     GXClearVtxDesc();
@@ -216,7 +195,63 @@ static void fn_8005E638(GXColor color) {
     GXSetTevColor(GX_TEVREG0, color);
 }
 
-static void fn_8005E800(s32 param_1, s32 param_2, u16 param_3, u16 param_4, s32 param_5, u32 param_6) {
+#pragma inline_max_auto_size(100)
+
+void helpMenuSetupRender(GXTexObj* pTexObj) {
+    Rect rect = {0};
+    GXColor color;
+    f32 fWidth;
+    f32 fHeight;
+    Mtx44 matrix44;
+    f32 x1 = 0.0f;
+    f32 y1 = 0.0f;
+    f32 y0 = 0.0f;
+    f32 x0 = 0.0f;
+
+    rect.x1 = sRenderMode->fbWidth / 2;
+    rect.y1 = sRenderMode->xfbHeight / 2;
+
+    GXInvalidateVtxCache();
+    GXInvalidateTexAll();
+
+    if (fn_8007FC84()) {
+        fWidth = ((sRenderMode->viWidth - 704) * 320) / 1408.0f;
+        fHeight = ((sRenderMode->viHeight - 574) * 287) / 1148.0f;
+        C_MTXOrtho(matrix44, -fHeight, fHeight + 287.0f, -fWidth, fWidth + 320.0f, 0.0f, -1.0f);
+    } else {
+        fWidth = ((sRenderMode->viWidth - 704) * 320) / 1408.0f;
+        fHeight = ((sRenderMode->viHeight - 480) * 240) / 960.0f;
+        C_MTXOrtho(matrix44, -fHeight, fHeight + 240.0f, -fWidth, fWidth + 320.0f, 0.0f, -1.0f);
+    }
+
+    GXSetViewport(0.0f, 0.0f, sRenderMode->fbWidth, sRenderMode->efbHeight, 0.0f, 1.0f);
+    GXSetProjection(matrix44, GX_ORTHOGRAPHIC);
+
+    GXSetFog(GX_FOG_NONE, lbl_8025C850[0], 0.0f, 0.0f, 0.0f, 1000.0f);
+    GXFlush();
+
+    color.a = color.r = color.g = color.b = 0xFF;
+    helpMenuSetupTexturedQuad(pTexObj, color);
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    x0 = rect.x0;
+    y0 = rect.y0;
+    x1 = rect.x1;
+    y1 = rect.y1;
+    GXPosition3f32(x0, y0, 0.0f);
+    GXTexCoord2u8(0, 0);
+    GXPosition3f32(x0, y1, 0.0f);
+    GXTexCoord2u8(0, 1);
+    GXPosition3f32(x1, y1, 0.0f);
+    GXTexCoord2u8(1, 1);
+    GXPosition3f32(x1, y0, 0.0f);
+    GXTexCoord2u8(1, 0);
+    GXEnd();
+}
+
+#pragma inline_max_auto_size(10)
+
+static void helpMenu_8005E800(s32 param_1, s32 param_2, u16 param_3, u16 param_4, s32 param_5, u32 param_6) {
     f32 view[6];
     void* pBuffer;
     Rect rect;
@@ -230,7 +265,7 @@ static void fn_8005E800(s32 param_1, s32 param_2, u16 param_3, u16 param_4, s32 
         rectPAL = lbl_8016A7D0;
 
         GXGetViewportv(view);
-        fn_8005E638(local_54);
+        helpMenuSetupColoredQuad(local_54);
 
         if (fn_8007FC84()) {
             f32 x1;
@@ -305,11 +340,11 @@ static void fn_8005E800(s32 param_1, s32 param_2, u16 param_3, u16 param_4, s32 
     }
 }
 
-static inline bool fn_8005F7E4_UnknownInline(void) {
-    return fn_8005F6F4(SYSTEM_HELP(gpSystem), "html.arc", &lbl_8025D0F8, &sMemAllocator2);
+bool helpMenuUpdate_UnknownInline(void) {
+    return helpMenuAllocateFile(SYSTEM_HELP(gpSystem), "html.arc", &lbl_8025D0F8, &sMemAllocator2);
 }
 
-static void fn_8005EAFC(void) {
+static void helpMenu_8005EAFC(void) {
     GXRenderModeObj sp8;
     s32 var_r31;
 
@@ -383,7 +418,7 @@ static void fn_8005EAFC(void) {
     }
 
     fn_800887CC(sWebsitePath);
-    lbl_8025D0BC = fn_800887C8(fn_8005E800, lbl_8025D0BC, lbl_8025D0B8);
+    lbl_8025D0BC = fn_800887C8(helpMenu_8005E800, lbl_8025D0BC, lbl_8025D0B8);
 
     VIConfigure(sRenderMode);
     VIFlush();
@@ -392,7 +427,7 @@ static void fn_8005EAFC(void) {
     VIWaitForRetrace();
 }
 
-static inline void fn_8005EDFC_UnknownInline(GXColor color) {
+static inline void helpMenu_8005EDFC_UnknownInline(GXColor color) {
     GXTexObj texObj;
     GXColor color2;
 
@@ -432,7 +467,9 @@ static inline void fn_8005EDFC_UnknownInline(GXColor color) {
     GXEnd();
 }
 
-static void fn_8005EDFC(void) {
+const GXColor lbl_8025DEEC = {255, 255, 255, 0};
+
+static void helpMenu_8005EDFC(void) {
     f32 fTime = OSTicksToMilliseconds(OSGetTick() - lbl_801C7D28.unk08);
 
     switch (lbl_801C7D28.unk0C) {
@@ -454,36 +491,38 @@ static void fn_8005EDFC(void) {
             lbl_801C7D28.unk0D = 255.9f * ((250.0f - fTime) / 250.0f);
             if (fTime >= 250.0f) {
                 lbl_801C7D28.unk0D = 0;
-                lbl_801C7D28.unk04 = 0;
+                lbl_801C7D28.unk04 = false;
             }
             break;
     }
 
-    fn_8005EDFC_UnknownInline(lbl_8025DEEC);
+    helpMenu_8005EDFC_UnknownInline(lbl_8025DEEC);
 }
 
-static void fn_8005F154(void) {
+static void helpMenuPowerCallback(void) {
     lbl_8025D0F0 = false;
     lbl_8025D0E8 = true;
+
     if (lbl_8025D118 == 7) {
         fn_800887D4(0x1E);
         lbl_8025D110 = 0;
     }
 }
 
-static void fn_8005F1A0(void) {
+static void helpMenuResetCallback(void) {
     lbl_8025D0F0 = false;
     lbl_8025D0EC = true;
+
     if (lbl_8025D118 == 7) {
         fn_800887D4(0x1E);
         lbl_8025D110 = 0;
     }
 }
 
-static bool fn_8005F1EC(void) { return false; }
+static bool helpMenuSoundCallback(s32 event, s32 num) { return false; }
 
-static inline void fn_8005F1F4_UnknownInline1(NANDFileInfo* pFileInfo, void** ppBuffer, char* szPath) {
-    s32 nLength = fn_8005E2D0(&sHandleNAND, szPath, ppBuffer, &sMemAllocator2, &sMemAllocator1);
+void helpMenuInit_UnknownInline1(NANDFileInfo* pFileInfo, void** ppBuffer, char* szPath) {
+    s32 nLength = helpMenuReadNAND(&sHandleNAND, szPath, ppBuffer, &sMemAllocator2, &sMemAllocator1);
     NANDCreate("/tmp/HBMSE.brsar", 0x30, 0);
     NANDOpen("/tmp/HBMSE.brsar", pFileInfo, 2);
     NANDWrite(pFileInfo, *ppBuffer, nLength);
@@ -491,8 +530,8 @@ static inline void fn_8005F1F4_UnknownInline1(NANDFileInfo* pFileInfo, void** pp
     fn_800888DC(ppBuffer);
 }
 
-static inline void fn_8005F1F4_UnknownInline2(NANDFileInfo* pFileInfo, void** ppBuffer, char* szPath) {
-    s32 nLength = fn_8005F6F4(SYSTEM_HELP(gpSystem), szPath, (s32**)ppBuffer, &sMemAllocator2);
+void helpMenuInit_UnknownInline2(NANDFileInfo* pFileInfo, void** ppBuffer, char* szPath) {
+    s32 nLength = helpMenuAllocateFile(SYSTEM_HELP(gpSystem), szPath, (s32**)ppBuffer, &sMemAllocator2);
     NANDCreate("/tmp/opera.arc", 0x30, 0);
     NANDOpen("/tmp/opera.arc", pFileInfo, 2);
     NANDWrite(pFileInfo, *ppBuffer, nLength);
@@ -500,15 +539,16 @@ static inline void fn_8005F1F4_UnknownInline2(NANDFileInfo* pFileInfo, void** pp
     fn_800888DC(ppBuffer);
 }
 
-static void fn_8005F1F4(HelpMenu* pHelpMenu) {
+static void helpMenuInit(HelpMenu* pHelpMenu) {
     NANDFileInfo sp30;
     void* sp8;
     char* temp_r16;
     char sp10[32] = "HomeButton3/";
+    u8 language;
 
     temp_r16 = &sp10[strlen(sp10)];
 
-    xlHeapFill8(&lbl_801C7D38, sizeof(struct_801C7D38), 0);
+    xlHeapFill8(&sHBMDataInfo, sizeof(HBMDataInfo), 0);
     lbl_8025D0C4 = NULL;
     contentInitHandleNAND(4, &sHandleNAND, &sMemAllocator2);
 
@@ -516,44 +556,91 @@ static void fn_8005F1F4(HelpMenu* pHelpMenu) {
         sp8 = NULL;
         lbl_8025D0C0 = 1;
         strcpy(temp_r16, "Huf8_HomeButtonSe.brsar");
-        fn_8005F1F4_UnknownInline1(&sp30, &sp8, sp10);
-        fn_8005F1F4_UnknownInline2(&sp30, &sp8, "Opera.arc");
+        helpMenuInit_UnknownInline1(&sp30, &sp8, sp10);
+        helpMenuInit_UnknownInline2(&sp30, &sp8, "Opera.arc");
     }
 
     strcpy(sWebsitePath, "arc:/html/");
     lbl_8025D0F4 = sWebsitePath + strlen(sWebsitePath);
-    lbl_801C7D38.pTPLPalette = NULL;
+
+#if VERSION == OOT_J
+    sHBMDataInfo.region = SC_LANG_JP;
     strcpy(temp_r16, "LZ77_homeBtn.arc");
     strcpy(lbl_8025D0F4, "index/index_Frameset.html");
-    fn_8005E2D0(&sHandleNAND, sp10, &lbl_801C7D38.pBuffer1, &sMemAllocator2, &sMemAllocator1);
-    strcpy(temp_r16, "Huf8_SpeakerSe.arc");
-    fn_8005E2D0(&sHandleNAND, sp10, &lbl_801C7D38.pBuffer2, &sMemAllocator2, &sMemAllocator1);
-    strcpy(temp_r16, "home.csv");
-    fn_8005E2D0(&sHandleNAND, sp10, &lbl_801C7D38.pBuffer3, &sMemAllocator2, &sMemAllocator1);
-    strcpy(temp_r16, "config.txt");
-    fn_8005E2D0(&sHandleNAND, sp10, &lbl_801C7D38.pBuffer4, &sMemAllocator2, &sMemAllocator1);
+#else
+    language = SCGetLanguage();
+    sHBMDataInfo.region = language;
 
-    lbl_801C7D38.unk24 = fn_8005F1EC;
-    lbl_801C7D38.unk28 = 0;
-    lbl_801C7D38.unk30 = 0;
-    lbl_801C7D38.unk40 = 1.3684211f;
-    lbl_801C7D38.unk44 = 1.0f;
-    lbl_801C7D38.unk3C = 1.0f;
+    switch (language) {
+#if VERSION == OOT_E
+        case SC_LANG_DE:
+            strcpy(temp_r16, "LZ77_homeBtn_GER.arc");
+            strcpy(lbl_8025D0F4, "startup_noe.html");
+            break;
+#endif
+        case SC_LANG_FR:
+            strcpy(temp_r16, "LZ77_homeBtn_FRA.arc");
+            strcpy(lbl_8025D0F4, "startup_fra.html");
+            break;
+        case SC_LANG_SP:
+            strcpy(temp_r16, "LZ77_homeBtn_SPA.arc");
+            strcpy(lbl_8025D0F4, "startup_esp.html");
+            break;
+#if VERSION == OOT_E
+        case SC_LANG_IT:
+            strcpy(temp_r16, "LZ77_homeBtn_ITA.arc");
+            strcpy(lbl_8025D0F4, "startup_ita.html");
+            break;
+        case SC_LANG_NL:
+            strcpy(temp_r16, "LZ77_homeBtn_NED.arc");
+            strcpy(lbl_8025D0F4, "startup_hol.html");
+            break;
+#endif
+        case SC_LANG_EN:
+        default:
+            strcpy(temp_r16, "LZ77_homeBtn_ENG.arc");
+            strcpy(lbl_8025D0F4, "startup.html");
+            OSReport("SC_LANG_ENGLISH\n");
+            break;
+    }
+#endif
+
+    helpMenuReadNAND(&sHandleNAND, sp10, &sHBMDataInfo.layoutBuf, &sMemAllocator2, &sMemAllocator1);
+
+    strcpy(temp_r16, "Huf8_SpeakerSe.arc");
+    helpMenuReadNAND(&sHandleNAND, sp10, &sHBMDataInfo.spkSeBuf, &sMemAllocator2, &sMemAllocator1);
+
+    strcpy(temp_r16, "home.csv");
+    helpMenuReadNAND(&sHandleNAND, sp10, &sHBMDataInfo.msgBuf, &sMemAllocator2, &sMemAllocator1);
+
+    strcpy(temp_r16, "config.txt");
+    helpMenuReadNAND(&sHandleNAND, sp10, &sHBMDataInfo.configBuf, &sMemAllocator2, &sMemAllocator1);
+
+    sHBMDataInfo.sound_callback = helpMenuSoundCallback;
+    sHBMDataInfo.backFlag = 0;
+    sHBMDataInfo.cursor = 0;
+    sHBMDataInfo.adjust.x = 1.3684211f;
+    sHBMDataInfo.adjust.y = 1.0f;
+    sHBMDataInfo.frameDelta = 1.0f;
 
     strcpy(temp_r16, "homeBtnIcon.tpl");
-    fn_8005E2D0(&sHandleNAND, sp10, (void**)&lbl_801C7D28, &sMemAllocator2, &sMemAllocator1);
+    helpMenuReadNAND(&sHandleNAND, sp10, (void**)&lbl_801C7D28, &sMemAllocator2, &sMemAllocator1);
     TPLBind(lbl_801C7D28.pTPLPalette);
-    lbl_801C7D38.unk38 = 0x80000;
-    fn_8008882C(&lbl_801C7D38.unk20, 0x80000, &sMemAllocator2, &sMemAllocator1);
-    lbl_801C7D38.unk48 = 0;
-    fn_80088994(&lbl_801C7D38);
-    fn_80100870(&lbl_801C7D38);
-    fn_8008882C(&lbl_8025D0C4, 0xa0000, &sMemAllocator2, &sMemAllocator1);
-    fn_80100CD8("/tmp/HBMSE.brsar", lbl_8025D0C4, 0xa0000);
-    fn_80100940();
+
+    sHBMDataInfo.memSize = 0x80000;
+    fn_8008882C(&sHBMDataInfo.mem, 0x80000, &sMemAllocator2, &sMemAllocator1);
+
+    sHBMDataInfo.pAllocator = NULL;
+    fn_80088994(&sHBMDataInfo);
+    HBMCreate(&sHBMDataInfo);
+
+    fn_8008882C(&lbl_8025D0C4, 0xA0000, &sMemAllocator2, &sMemAllocator1);
+    HBMCreateSound("/tmp/HBMSE.brsar", lbl_8025D0C4, 0xA0000);
+
+    HBMInit();
 }
 
-bool fn_8005F5F4(HelpMenu* pHelpMenu, void* pObject, s32 nByteCount, HelpMenuCallback callback) {
+bool helpMenuAllocate(HelpMenu* pHelpMenu, void* pObject, s32 nByteCount, HelpMenuCallback callback) {
     u32 nSize;
     s32 var_r7;
     s32 nSizeExtra;
@@ -611,7 +698,7 @@ bool fn_8005F5F4(HelpMenu* pHelpMenu, void* pObject, s32 nByteCount, HelpMenuCal
     return true;
 }
 
-static bool fn_8005F6F4(HelpMenu* pHelpMenu, char* szFileName, s32** arg2, MEMAllocator* arg3) {
+static bool helpMenuAllocateFile(HelpMenu* pHelpMenu, char* szFileName, s32** arg2, MEMAllocator* arg3) {
     s32 nSize;
     tXL_FILE* pFile;
 
@@ -676,15 +763,6 @@ static inline bool helpMenuDestroyHeap(HelpMenu* pHelpMenu) {
     return true;
 }
 
-static inline void helpMenuSetupRender() {
-    GXColor color;
-    GXSetFog(GX_FOG_NONE, lbl_8025C850[0], 0.0f, 0.0f, 0.0f, 4.4765625f);
-    GXFlush();
-
-    color.a = color.r = color.g = color.b = 0xFF;
-    fn_8005E45C(&sTexObj, color);
-}
-
 static inline void helpMenuUnknownControllerInline() {
     u8 i;
 
@@ -701,33 +779,29 @@ static inline void helpMenuUnknownControllerInline() {
     }
 }
 
-s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
-    f32 fWidth;
-    f32 fHeight;
+s32 helpMenuUpdate(HelpMenu* pHelpMenu) {
     Mtx44 matrix44_4;
     Mtx matrix;
     Mtx44 matrix44;
     s32 iVar9;
     void* pCurrentFrameBuffer;
-    Mtx44 matrix44_2;
-    Mtx44 matrix44_3;
     s32 i;
     bool bVar8 = false;
 
-    if (lbl_801C7D28.unk04 != 0 && lbl_801C7D28.pTPLPalette != NULL) {
-        GXSetViewport(0.0f, 0.0f, 4.125f, 3.96875f, 0.0f, 1.875f);
+    if (lbl_801C7D28.unk04 && lbl_801C7D28.pTPLPalette != NULL) {
+        GXSetViewport(0.0f, 0.0f, GC_FRAME_WIDTH, GC_FRAME_HEIGHT, 0.0f, 1.0f);
         GXSetScissor(0, 0, GC_FRAME_WIDTH, GC_FRAME_HEIGHT);
         GXSetCullMode(GX_CULL_NONE);
         GXSetZMode(GX_FALSE, GX_LEQUAL, GX_TRUE);
-        C_MTXOrtho(matrix44, 0.0f, 3.7167969f, 0.0f, 3.8310547f, 0.0f, 4.477539f);
+        C_MTXOrtho(matrix44, 0.0f, 239.0f, 0.0f, 339.0f, 0.0f, 1001.0f);
         GXSetProjection(matrix44, GX_ORTHOGRAPHIC);
         PSMTXIdentity(matrix);
         GXLoadPosMtxImm(matrix, 3);
-        fn_8005EDFC();
+        helpMenu_8005EDFC();
     }
 
-    if (pHelpMenu->unk08 != 0) {
-        pHelpMenu->unk08 = 0;
+    if (pHelpMenu->unk08) {
+        pHelpMenu->unk08 = false;
 
         if (!fn_800631B8(SYSTEM_CONTROLLER(gpSystem), 0)) {
             return false;
@@ -766,47 +840,7 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
         GXSetDispCopyDst(sRenderMode->fbWidth, sRenderMode->xfbHeight);
 
         if (lbl_8025D0C8 != NULL) {
-            Rect rect = {0};
-            f32 x1;
-            f32 y1;
-            f32 y0;
-            f32 x0;
-
-            rect.x1 = sRenderMode->fbWidth / 2;
-            rect.y1 = sRenderMode->xfbHeight / 2;
-
-            GXInvalidateVtxCache();
-            GXInvalidateTexAll();
-
-            if (fn_8007FC84()) {
-                fWidth = ((sRenderMode->viWidth - 704) * 320) / 1408.0f;
-                fHeight = ((sRenderMode->viHeight - 574) * 287) / 1148.0f;
-                C_MTXOrtho(matrix44_2, -fHeight, fHeight + 287.0f, -fWidth, fWidth + 320.0f, 0.0f, -1.0f);
-            } else {
-                fWidth = ((sRenderMode->viWidth - 704) * 320) / 1408.0f;
-                fHeight = ((sRenderMode->viHeight - 480) * 240) / 960.0f;
-                C_MTXOrtho(matrix44_2, -fHeight, fHeight + 240.0f, -fWidth, fWidth + 320.0f, 0.0f, -1.0f);
-            }
-
-            GXSetViewport(0.0f, 0.0f, sRenderMode->fbWidth, sRenderMode->efbHeight, 0.0f, 1.0f);
-            GXSetProjection(matrix44_2, GX_ORTHOGRAPHIC);
-
-            helpMenuSetupRender();
-
-            GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-            x0 = rect.x0;
-            y0 = rect.y0;
-            x1 = rect.x1;
-            y1 = rect.y1;
-            GXPosition3f32(x0, y0, 0.0f);
-            GXTexCoord2u8(0, 0);
-            GXPosition3f32(x0, y1, 0.0f);
-            GXTexCoord2u8(0, 1);
-            GXPosition3f32(x1, y1, 0.0f);
-            GXTexCoord2u8(1, 1);
-            GXPosition3f32(x1, y0, 0.0f);
-            GXTexCoord2u8(1, 0);
-            GXEnd();
+            helpMenuSetupRender(&sTexObj);
         }
 
         lbl_8025D0FC ^= 1;
@@ -823,14 +857,14 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
         fn_800B1AB8();
         AXSetMode(0);
         fn_800B1B84(1);
-        fn_8005F1F4(fn_80083140());
-        fn_80100AD8(0);
+        helpMenuInit(fn_80083140());
+        HBMSetAdjustFlag(false);
 
         for (i = 0; i < PAD_MAX_CONTROLLERS; i++) {
             fn_800CB958(i);
         }
 
-        lbl_801C7D28.unk04 = 0;
+        lbl_801C7D28.unk04 = false;
         lbl_8025D118 = 2;
 
         while (!bVar8) {
@@ -842,7 +876,7 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
                     case 4:
                         if (!lbl_8025D0F0) {
                             lbl_8025D0F0 = true;
-                            fn_80100AE4();
+                            HBMStartBlackOut();
                         }
                         break;
                     default:
@@ -882,31 +916,31 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
                 case_4:
                 case 4:
                     helpMenuUnknownControllerInline();
-                    fn_80100E40();
-                    if (fn_80100948(&lbl_801CA670) == -1) {
+                    HBMUpdateSound();
+                    if (HBMCalc(&lbl_801CA670) == HBM_SELECT_NULL) {
                         break;
                     }
 
-                    switch (fn_80100AB8()) {
-                        case 1:
+                    switch (HBMGetSelectBtnNum()) {
+                        case HBM_SELECT_BTN1:
                             VISetBlack(true);
                             VIFlush();
                             fn_8000A830(gpSystem, 0x1004, NULL);
                             OSReturnToMenu();
-                        case 2:
+                        case HBM_SELECT_BTN2:
                             lbl_8025D110 = 0;
                             lbl_8025D0EC = true;
                             goto case_9;
-                        case 3:
+                        case HBM_SELECT_BTN3:
                             lbl_8025D118 = 6;
                             fn_80088660();
-                            fn_8005F7E4_UnknownInline();
+                            helpMenuUpdate_UnknownInline();
                             fn_800887C4(lbl_8025D0F8);
 
                             OSDisableInterrupts();
                             if (!lbl_8025D0EC && !lbl_8025D0E8) {
                                 lbl_8025D118 = 7;
-                                fn_8005EAFC();
+                                helpMenu_8005EAFC();
                             }
                             fn_80088674();
                             fn_8008876C();
@@ -919,7 +953,7 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
                             lbl_8025D114 = -3;
                             lbl_8025D118 = 8;
                             goto case_8;
-                        case 0:
+                        case HBM_SELECT_HOMEBTN:
                             lbl_8025D118 = 8;
                             goto case_8;
                     }
@@ -949,53 +983,13 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
             }
 
             if (lbl_8025D0C8 != NULL) {
-                Rect rect = {0};
-                f32 x1;
-                f32 y1;
-                f32 y0;
-                f32 x0;
-
-                rect.x1 = sRenderMode->fbWidth / 2;
-                rect.y1 = sRenderMode->xfbHeight / 2;
-
-                GXInvalidateVtxCache();
-                GXInvalidateTexAll();
-
-                if (fn_8007FC84()) {
-                    fWidth = ((sRenderMode->viWidth - 704) * 320) / 1408.0f;
-                    fHeight = ((sRenderMode->viHeight - 574) * 287) / 1148.0f;
-                    C_MTXOrtho(matrix44_3, -fHeight, fHeight + 287.0f, -fWidth, fWidth + 320.0f, 0.0f, -1.0f);
-                } else {
-                    fWidth = ((sRenderMode->viWidth - 704) * 320) / 1408.0f;
-                    fHeight = ((sRenderMode->viHeight - 480) * 240) / 960.0f;
-                    C_MTXOrtho(matrix44_3, -fHeight, fHeight + 240.0f, -fWidth, fWidth + 320.0f, 0.0f, -1.0f);
-                }
-
-                GXSetViewport(0.0f, 0.0f, sRenderMode->fbWidth, sRenderMode->efbHeight, 0.0f, 1.0f);
-                GXSetProjection(matrix44_3, GX_ORTHOGRAPHIC);
-
-                helpMenuSetupRender();
-
-                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-                x0 = rect.x0;
-                y0 = rect.y0;
-                x1 = rect.x1;
-                y1 = rect.y1;
-                GXPosition3f32(x0, y0, 0.0f);
-                GXTexCoord2u8(0, 0);
-                GXPosition3f32(x0, y1, 0.0f);
-                GXTexCoord2u8(0, 1);
-                GXPosition3f32(x1, y1, 0.0f);
-                GXTexCoord2u8(1, 1);
-                GXPosition3f32(x1, y0, 0.0f);
-                GXTexCoord2u8(1, 0);
-                GXEnd();
+                helpMenuSetupRender(&sTexObj);
             }
 
             if (fn_8007FC84()) {
-                C_MTXOrtho(matrix44_4, 3.71875f, -3.72625f, -3.8125f, 3.8125f, 0.0f, 3.9882812f);
+                C_MTXOrtho(matrix44_4, 240.0f, -243.84001f, -320.0f, 320.0f, 0.0f, 500.0f);
             } else {
-                C_MTXOrtho(matrix44_4, 3.71875f, -3.71875f, -3.8125f, 3.8125f, 0.0f, 3.9882812f);
+                C_MTXOrtho(matrix44_4, 240.0f, -240.0f, -320.0f, 320.0f, 0.0f, 500.0f);
             }
 
             GXSetProjection(matrix44_4, GX_ORTHOGRAPHIC);
@@ -1013,7 +1007,7 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
             GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
             GXSetZMode(GX_ENABLE, GX_LEQUAL, GX_ENABLE);
             GXSetCurrentMtx(3);
-            fn_8010098C();
+            HBMDraw();
             lbl_8025D0FC ^= 1;
             GXCopyDisp(lbl_8025D100[lbl_8025D0FC], GX_TRUE);
             GXDrawDone();
@@ -1029,14 +1023,14 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
 
         lbl_8025D0C8 = NULL;
 
-        fn_80100E0C();
-        fn_801008F8();
+        HBMDeleteSound();
+        HBMDelete();
         fn_80083154();
         AXQuit();
         fn_800B1B80();
         AIStopDMA();
         AIRegisterDMACallback(lbl_8025D108);
-        fn_800888DC(&lbl_801C7D38.unk20);
+        fn_800888DC(&sHBMDataInfo.mem);
         contentReleaseHandleNAND(&sHandleNAND);
 
         if (!fn_800631B8(SYSTEM_CONTROLLER(gpSystem), 1)) {
@@ -1077,24 +1071,24 @@ s32 fn_8005F7E4(HelpMenu* pHelpMenu) {
     return true;
 }
 
-bool fn_800607B0(HelpMenu* pHelpMenu, s32 arg1) {
+bool helpMenu_800607B0(HelpMenu* pHelpMenu, bool arg1) {
     pHelpMenu->unk0C = arg1;
-    pHelpMenu->unk08 = 0;
+    pHelpMenu->unk08 = false;
     return true;
 }
 
-bool fn_800607C4(HelpMenu* pHelpMenu, s32 arg1) {
-    if (pHelpMenu->unk0C == 0) {
+bool helpMenu_800607C4(HelpMenu* pHelpMenu, bool arg1) {
+    if (!pHelpMenu->unk0C) {
         lbl_801C7D28.unk0C = 0;
-        lbl_801C7D28.unk04 = 1;
+        lbl_801C7D28.unk04 = true;
         lbl_801C7D28.unk08 = OSGetTick();
         lbl_801C7D28.unk0D = 0;
     } else {
         if (OSGetTime() - lbl_8025D0D0 < OSMillisecondsToTicks(250)) {
-            arg1 = 0;
+            arg1 = false;
         }
 
-        pHelpMenu->unk08 = arg1 != 0 && lbl_801C7D28.unk04 == 0;
+        pHelpMenu->unk08 = arg1 && !lbl_801C7D28.unk04;
     }
 
     return true;
@@ -1132,15 +1126,15 @@ static inline bool helpMenuFree(HelpMenu* pHelpMenu) {
 bool helpMenuEvent(HelpMenu* pHelpMenu, s32 nEvent, void* pArgument) {
     switch (nEvent) {
         case 0:
-            pHelpMenu->unk0C = 1;
+            pHelpMenu->unk0C = true;
             lbl_8025D0EC = false;
             lbl_8025D0E8 = false;
 
-            OSSetResetCallback(fn_8005F1A0);
-            OSSetPowerCallback(fn_8005F154);
+            OSSetResetCallback(helpMenuResetCallback);
+            OSSetPowerCallback(helpMenuPowerCallback);
 
             lbl_801C7D28.pTPLPalette = NULL;
-            lbl_801C7D28.unk04 = 0;
+            lbl_801C7D28.unk04 = false;
 
             if (xlFileLoad("homeBtnIcon.tpl", (void**)&lbl_801C7D28.pTPLPalette)) {
                 TPLBind(lbl_801C7D28.pTPLPalette);
@@ -1159,7 +1153,7 @@ bool helpMenuEvent(HelpMenu* pHelpMenu, s32 nEvent, void* pArgument) {
             break;
         case 2:
             lbl_8025D0D0 = OSGetTime();
-            pHelpMenu->unk08 = 0;
+            pHelpMenu->unk08 = false;
             break;
         case 3:
         case 5:

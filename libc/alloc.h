@@ -7,7 +7,8 @@
 extern "C" {
 #endif
 
-void free(void*);
+void* malloc(size_t) __attribute__((nothrow));
+void free(void*) __attribute__((nothrow));
 
 #ifdef __cplusplus
 }
