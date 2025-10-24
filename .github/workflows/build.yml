@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    container: ghcr.io/Yanis002/oot-gc-vc-build:main # temp!
+    container: ghcr.io/yanis002/oot-gc-vc-build:main # temp!
     runs-on: ubuntu-latest
     defaults:
       run:
