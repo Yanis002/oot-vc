@@ -482,6 +482,11 @@ def generate_build(config: ProjectConfig, only_objdiff: bool = False) -> None:
         props.configs[version] = build_props.configs[version]
         props.objects[version] = build_props.objects[version]
         props.rebuild = build_props.rebuild
+
+        directory = Path(f"build/{version}/")
+        if not directory.exists():
+            directory.mkdir(parents=True)
+
         generate_objdiff_config(config, props, f"build/{version}/objdiff.json")
 
 
@@ -1008,7 +1013,6 @@ def generate_build_ninja(
         objects = build_props.objects[version]
 
         if build_config is None:
-            print(f"Warning: config is None! ({build_props.configs})")
             continue
 
         used_compiler_versions: Set[str] = set()
@@ -1263,6 +1267,10 @@ def generate_build_ninja(
         link_outputs[version] = []
 
     for version in config.versions:
+        build_config = build_props.configs[version]
+        if build_config is None:
+            continue
+
         for step in link_steps[version]:
             step.write(n)
             link_outputs[version].append(step.output())
@@ -1278,6 +1286,10 @@ def generate_build_ninja(
     # Generate DOL
     ###
     for version in config.versions:
+        build_config = build_props.configs[version]
+        if build_config is None:
+            continue
+
         n.build(
             outputs=link_steps[version][0].output(),
             rule="elf2dol",
@@ -1291,6 +1303,9 @@ def generate_build_ninja(
     ###
     flags = "-w"
     for version, build_config in build_props.configs.items():
+        if build_config is None:
+            continue
+
         if len(build_config["links"]) > 1:
             flags += " -q"
 
@@ -1305,6 +1320,9 @@ def generate_build_ninja(
 
     for version, build_config in build_props.configs.items():
         config.version = version
+
+        if build_config is None:
+            continue
 
         generated_rels: List[str] = []
         for idx, link in enumerate(build_config["links"]):
@@ -1389,6 +1407,10 @@ def generate_build_ninja(
     # Helper rule for building all source files for a specific version
     ###
     for version in config.versions:
+        build_config = build_props.configs[version]
+        if build_config is None:
+            continue
+
         n.comment(f"Build all source files ({version})")
         n.build(
             outputs=f"all_source_{version.replace('-', '_')}",
@@ -1402,6 +1424,10 @@ def generate_build_ninja(
     ###
     quiet = ""
     for version in config.versions:
+        build_config = build_props.configs[version]
+        if build_config is None:
+            continue
+
         if len(link_steps[version]) > 3:
             quiet = "-q"
             break
@@ -1446,6 +1472,10 @@ def generate_build_ninja(
     )
     n.newline()
     for version in config.versions:
+        build_config = build_props.configs[version]
+        if build_config is None:
+            continue
+
         if version == config.default_version:
             continue
 
@@ -1473,6 +1503,10 @@ def generate_build_ninja(
         description="REPORT",
     )
     for version in config.versions:
+        build_config = build_props.configs[version]
+        if build_config is None:
+            continue
+
         n.build(
             outputs=f"build/{version}/report.json",
             rule="report",
@@ -1835,6 +1869,9 @@ def generate_objdiff_config(
         objdiff_config["units"].append(unit_config)
 
     for version, build_config in build_props.configs.items():
+        if build_config is None:
+            continue
+
         config.version = version
         objects = build_props.objects[version]
 
