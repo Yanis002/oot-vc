@@ -1002,11 +1002,13 @@ def generate_build_ninja(
         link_steps[version] = []
         source_inputs[version] = []
 
-    for version, build_config in build_props.configs.items():
+    for version in config.versions:
         config.version = version
+        build_config = build_props.configs[version]
         objects = build_props.objects[version]
 
         if build_config is None:
+            print(f"Warning: config is None! ({build_props.configs})")
             continue
 
         used_compiler_versions: Set[str] = set()
