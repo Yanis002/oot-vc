@@ -371,7 +371,8 @@ config.libs = [
     RevolutionLib(
         "vcmv",
         [
-            Object(NotLinked, "revolution/vcmv/code_80083070.cpp"),
+            Object(LinkedFor("oot-j"), "revolution/hbm/vcmv/vcmv_cursor.cpp", extra_cflags=["-use_lmw_stmw on", "-fp_contract on", "-rostr"]),
+            Object(NotLinked, "revolution/hbm/vcmv/code_800838C0.cpp", extra_cflags=["-fp_contract on"]),
         ],
         cpp_exceptions="on"
     ),

@@ -27,7 +27,6 @@
 //! TODO: move to the proper headers when documented properly
 extern char* VCMVRun(void*, char*, u8);
 extern s32 fn_8008882C(void**, u32, MEMAllocator*, MEMAllocator*);
-extern void* fn_80083140(void);
 extern void fn_800888DC(void**);
 extern HBMControllerData lbl_801CA670;
 
@@ -616,7 +615,7 @@ void helpMenuInit_UnknownInline2(NANDFileInfo* pFileInfo, void** ppBuffer, char*
     fn_800888DC(ppBuffer);
 }
 
-static void helpMenuInit(HelpMenu* pHelpMenu) {
+static void helpMenuInit() {
     NANDFileInfo sp30;
     void* sp8;
     char* temp_r16;
@@ -956,7 +955,8 @@ s32 helpMenuUpdate(HelpMenu* pHelpMenu) {
         fn_800B1AB8();
         AXSetMode(0);
         fn_800B1B84(1);
-        helpMenuInit(fn_80083140());
+        VCMV_80083140();
+        helpMenuInit();
         HBMSetAdjustFlag(false);
 
         for (i = 0; i < PAD_MAX_CONTROLLERS; i++) {
@@ -1138,7 +1138,7 @@ s32 helpMenuUpdate(HelpMenu* pHelpMenu) {
 
         HBMDeleteSound();
         HBMDelete();
-        fn_80083154();
+        VCMV_80083154();
         AXQuit();
         fn_800B1B80();
         AIStopDMA();

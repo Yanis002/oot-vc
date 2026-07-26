@@ -4,6 +4,7 @@
 #include "revolution/hbm/HBMCommon.h"
 #include "revolution/kpad/KPAD.h"
 #include "revolution/mtx.h"
+#include "revolution/hbm/vcmv/vcmv.h"
 #include "revolution/types.h"
 
 #endif
