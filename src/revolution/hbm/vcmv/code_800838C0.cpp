@@ -1,3 +1,3 @@
 extern "C" {
-    void fn_800838C0() {}
+void fn_800838C0() {}
 }
