@@ -10,16 +10,6 @@ static UNKWORD lbl_8025D218 = 0;
 static UNKWORD lbl_8025D21C = 0;
 static TPLPalette* lbl_8025D220 = nullptr;
 
-struct UnkStruct_80175290 {
-    /* 00 */ f32 unk_00;
-    /* 04 */ f32 unk_04;
-    /* 08 */ f32 unk_08;
-    /* 0C */ f32 unk_0C;
-    /* 10 */ TPLPalette* unk_10;
-    /* 14 */ GXColor unk_14;
-    /* 18 */
-};
-
 static UnkStruct_80175290 lbl_80175290[] = {
     {50.0f, 50.0f, 0.38f, 0.92f, nullptr, {0, 140, 255, 255}}, // blue
     {50.0f, 50.0f, 0.38f, 0.92f, nullptr, {255, 56, 56, 255}}, // red
@@ -79,6 +69,8 @@ void VCMV_8008315C(void** param1) {
     ARCHandle sp24;
     ARCFileInfo sp18;
     ARCFileInfo spC;
+    UnkStruct_80175290* var_r15;
+    int i;
 
     char* temp_r14 = &sp78[strlen(sp78)];
     ARCInitHandle(*param1, &sp5C);
@@ -92,8 +84,8 @@ void VCMV_8008315C(void** param1) {
 
     strcpy(temp_r14, "_p1.tpl");
 
-    UnkStruct_80175290* var_r15 = &lbl_80175290[0];
-    for (int i = 0; i < ARRAY_COUNT(lbl_80175290); i++, var_r15++) {
+    var_r15 = &lbl_80175290[0];
+    for (i = 0; i < ARRAY_COUNT(lbl_80175290); i++, var_r15++) {
         temp_r14[2] = i + '1'; // hacky way to get "_p{i}.tpl"
         sp24 = sp5C;
         ARCOpen(&sp24, sp78, &spC);
@@ -105,28 +97,29 @@ void VCMV_8008315C(void** param1) {
 
 void VCMV_8008345C(UNKWORD param1) {
     volatile UnkStruct_801CA6B0* temp_r6 = &lbl_801CA6B0[param1];
-
-    if (temp_r6->unk_00 == 0) {
-        return;
-    }
-
     f32 unk_34;
     f32 unk_38;
     f32 temp_f8;
     f32 temp_f9;
     f32 var_f10;
     f32 var_f11;
+    UnkStruct_80175290* temp_r31;
+    u8 var_r5;
+    GXTexObj sp40;
+    UnkStack20 sp20;
+
+    if (temp_r6->unk_00 == 0) {
+        return;
+    }
 
     unk_34 = temp_r6->unk_34;
     unk_38 = -temp_r6->unk_38;
     temp_f8 = temp_r6->unk_2C;
     temp_f9 = temp_r6->unk_30;
 
-    UnkStruct_80175290* temp_r31 = &lbl_80175290[param1];
+    temp_r31 = &lbl_80175290[param1];
     var_f10 = temp_r31->unk_00;
     var_f11 = temp_r31->unk_04;
-
-    u8 var_r5;
 
     if (param1 == lbl_8025D2D4) {
         if (temp_r6->unk_00 >= 0x240) {
@@ -157,8 +150,6 @@ void VCMV_8008345C(UNKWORD param1) {
         }
     }
 
-    GXTexObj sp40;
-    UnkStack20 sp20;
     GXColor sp18 = {224, 224, 224, var_r5};
 
     sp20.x2 = unk_34 - (temp_f8 * var_f10 * temp_r31->unk_08) - (temp_f9 * var_f11 * temp_r31->unk_0C);

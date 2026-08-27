@@ -267,6 +267,15 @@ def RevolutionHBMLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
         "objects": objects,
     }
 
+def RevolutionVCMVLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
+    return {
+        "lib": lib_name,
+        "mw_version": "GC/3.0a5",
+        "cflags": [*cflags_base, "-Cpp_exceptions on", "-O4,p", "-ipa file", "-enc SJIS", "-fp_contract on", "-use_lmw_stmw on", "-rostr"],
+        "progress_category": "vcmv",
+        "objects": objects,
+    }
+
 def LibC(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
         "lib": lib_name,
@@ -368,13 +377,13 @@ config.libs = [
             Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/NdevExi2AD/exi2.c"),
         ]
     ),
-    RevolutionLib(
+    RevolutionVCMVLib(
         "vcmv",
         [
-            Object(LinkedFor("oot-j"), "revolution/hbm/vcmv/vcmv_cursor.cpp", extra_cflags=["-use_lmw_stmw on", "-fp_contract on", "-rostr"]),
-            Object(NotLinked, "revolution/hbm/vcmv/code_800838C0.cpp", extra_cflags=["-fp_contract on"]),
-        ],
-        cpp_exceptions="on"
+            Object(LinkedFor("oot-j"), "revolution/hbm/vcmv/vcmv_cursor.cpp"),
+            Object(NotLinked, "revolution/hbm/vcmv/code_800838C0.cpp"),
+            Object(NotLinked, "revolution/hbm/vcmv/code_800867DC.cpp"),
+        ]
     ),
     RevolutionLib(
         "base",
@@ -932,12 +941,13 @@ config.progress_categories = [
     ProgressCategory("emulator", "Emulator"),
     ProgressCategory("revolution", "Revolution SDK"),
     ProgressCategory("hbm", "Home Button Menu"),
+    ProgressCategory("vcmv", "VCMV"),
     ProgressCategory("libc", "Libc"),
     ProgressCategory("runtime", "Runtime"),
     ProgressCategory("metrotrk", "MetroTRK"),
 ]
 
-config.print_progress_categories = ["emulator"]
+config.print_progress_categories = ["emulator", "vcmv"]
 
 # Optional extra arguments to `objdiff-cli report generate`
 config.progress_report_args = [
