@@ -245,7 +245,7 @@ revolution/hbm/vcmv/vcmv_cursor.cpp:
 	.text       start:0x80083070 end:0x800838C0
 	.rodata     start:0x8016A800 end:0x8016A840
 	.data       start:0x80175290 end:0x801752F0
-	.sbss       start:0x8025D218 end:0x8025D224
+	.sbss       start:0x8025D218 end:0x8025D228
 	.sdata2     start:0x8025E038 end:0x8025E050
 
 revolution/hbm/vcmv/code_800838C0.cpp:
@@ -256,7 +256,9 @@ revolution/hbm/vcmv/code_800838C0.cpp:
 	.rodata     start:0x8016A840 end:0x8016A8A8
 	.data       start:0x801752F0 end:0x80175460
 	.bss        start:0x801CA1C8 end:0x801CA650
-	.sdata2     start:0x8025E050 end:0x8025E084
+	.sdata      start:0x8025C8E8 end:0x8025C8F8
+	.sbss       start:0x8025D228 end:0x8025D298
+	.sdata2     start:0x8025E050 end:0x8025E0A0
 
 revolution/hbm/vcmv/code_800867DC.cpp:
 	extab       start:0x80006570 end:0x80006688

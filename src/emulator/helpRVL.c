@@ -39,13 +39,6 @@ extern HBMControllerData lbl_801CA670;
 static void helpMenuResetCallback(void);
 static void helpMenuPowerCallback(void);
 
-typedef struct Rect {
-    /* 0x0 */ f32 x0;
-    /* 0x4 */ f32 y0;
-    /* 0x8 */ f32 x1;
-    /* 0xC */ f32 y1;
-} Rect; // size = 0x10
-
 static MEMAllocator sMemAllocator1 = {0};
 static MEMAllocator sMemAllocator2 = {0}; // MyAllocMem2?
 static char sWebsitePath[40] = {0};

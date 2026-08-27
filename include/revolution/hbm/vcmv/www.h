@@ -23,7 +23,7 @@ extern void (*WWWSurfaceKeyboardEvt)();
 extern void (*WWWSurfaceAddFont)();
 extern void (*WWWCreateBrowser)();
 extern void (*WWWTerminateBrowser)();
-extern void (*WWWRunSlice)();
+extern UNKWORD (*WWWRunSlice)(UNKWORD);
 extern UNKWORD (*WWWCreateBrowserWindow)(UNKWORD, void*, UNKWORD);
 extern void (*WWWCloseBrowserWindow)(UNKWORD, UNKWORD);
 extern void (*WWWSetBrowserWindowTransparent)();

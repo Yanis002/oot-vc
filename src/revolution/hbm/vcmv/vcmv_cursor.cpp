@@ -9,6 +9,7 @@
 static UNKWORD lbl_8025D218 = 0;
 static UNKWORD lbl_8025D21C = 0;
 static TPLPalette* lbl_8025D220 = nullptr;
+s32 lbl_8025D224;
 
 static UnkStruct_80175290 lbl_80175290[] = {
     {50.0f, 50.0f, 0.38f, 0.92f, nullptr, {0, 140, 255, 255}}, // blue
