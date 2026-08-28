@@ -133,15 +133,59 @@ extern f32 lbl_8025C8E8;
 extern f32 lbl_8025C8EC;
 extern UNKWORD lbl_8025C8F0;
 
+// vcmv_javascript.cpp
+typedef struct UnkStruct_CommonFuncArg {
+    /* 00 */ UNKWORD unk_00;
+    /* 04 & 08 */ union {
+        f64 value_double;
+        void* ptr;
+        s32 value_int;
+    };
+} UnkStruct_CommonFuncArg; // size = 0x0C
+
+typedef struct UnkStruct_8025D298 {
+    /* 00 */ UNKWORD (*unk_00)(UNKWORD, UNKWORD, UNKWORD, void*, void*, const char*, UNKWORD, void*);
+    /* 04 */ UNKWORD (*unk_04)(UNKWORD, void*, UNKWORD, UNKWORD, void*);
+} UnkStruct_8025D298;
+
+typedef struct UnkStruct_801CA650 {
+    /* 00 */ const char** unk_00;
+    /* 00 */ UNKWORD unk_04;
+    /* 00 */ void* unk_08;
+    /* 00 */ UNKWORD unk_0C;
+    /* 00 */ UNKWORD unk_10;
+    /* 00 */ UNKWORD unk_14;
+    /* 00 */ UNKWORD unk_18;
+    /* 00 */ void* unk_1C;
+} UnkStruct_801CA650;
+
+typedef struct UnkStruct_8025D2B0 {
+    /* 00 */ UNKWORD unk_00;
+    /* 04 */ UNKWORD unk_04;
+    /* 08 */ UNKWORD unk_08;
+} UnkStruct_8025D2B0;
+
+s32 VCMV_800867DC();
+void VCMV_800867E4(void);
+s32 VCMV_80086864(UNKWORD param1, const char* param2, UnkStruct_CommonFuncArg* param3);
+s32 VCMV_8008691C(UNKWORD param1, s32 param2, int param3, UNKWORD param4, UnkStruct_CommonFuncArg* param5);
+s32 VCMV_800869A8(s32 param1, const char* param2, UnkStruct_CommonFuncArg* param3);
+s32 VCMV_80086CCC(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4);
+s32 VCMV_80086D08(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4);
+s32 VCMV_80086D60(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4);
+s32 VCMV_80086DB4(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4);
+s32 VCMV_80086E08(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4);
+UNKWORD VCMV_80086E18(void);
+UNKWORD VCMV_80086E20(void);
+void VCMV_80086E28(void);
+
+extern bool lbl_8025D2A4;
+
 // unk
-extern UNKWORD VCMV_80086E18(void);
-extern void VCMV_80086E20(void);
-extern void VCMV_80086E28(void);
 extern s32 VCMV_80087E34(void* param1, s32 param2, s32 param3, s32 param4);
 extern void VCMV_80087EE4(void* param1);
 
 extern UnkStruct_801CA6B0 lbl_801CA6B0[];
-extern bool lbl_8025D2A4;
 extern bool lbl_8025D2BE;
 extern bool lbl_8025D2BF;
 extern u8 lbl_8025D2D4;

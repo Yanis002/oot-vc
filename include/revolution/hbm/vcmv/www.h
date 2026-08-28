@@ -112,7 +112,7 @@ extern void (*WWWHTTPRemoveAuthCredentials)();
 extern void (*WWWHTTPSetProxy)();
 extern void (*WWWHTTPRemoveProxy)();
 extern void (*WWWHTTPEndLoading)();
-extern void (*WWWAddJSPlugin)();
+extern void (*WWWAddJSPlugin)(const char*, void*, void*, void*, void*);
 extern void (*WWWAddNSPlugin)();
 extern UNKWORD (*WWWProtocolWrite)(UNKWORD, void*, UNKWORD);
 extern UNKWORD (*WWWProtocolSetMimeType)(UNKWORD, const char*);
