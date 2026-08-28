@@ -18,7 +18,7 @@ static s8 lbl_8025D2B4;
 static const char* lbl_8025C8F8[] = {"vcJavaScriptExt"};
 
 static inline BOOL UnknownInline1(const char* param1, UNKWORD* param2, void* param3, UNKWORD param4,
-                                     bool do_force = false) {
+                                  bool do_force = false) {
     s32 sp8;
 
     if (strcmp(param1, lbl_8025D2AC) != 0) {
