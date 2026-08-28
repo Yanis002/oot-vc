@@ -3,6 +3,9 @@
 
 #include "revolution/gx/GXTexture.h"
 #include "revolution/gx/GXTypes.h"
+#include "revolution/hbm/HBMCommon.h"
+#include "revolution/mem/mem_allocator.h"
+#include "revolution/os/OSTime.h"
 #include "revolution/tpl/TPL.h"
 #include "revolution/types.h"
 
@@ -181,20 +184,45 @@ void VCMV_80086E28(void);
 
 extern bool lbl_8025D2A4;
 
-// unk
-extern s32 VCMV_80087E34(void* param1, s32 param2, s32 param3, s32 param4);
-extern void VCMV_80087EE4(void* param1);
+// vcmv_main.cpp
+void VCMV_80087654(void);
+void VCMV_80087918(s32 param1, s32 param2, s32 param3, u8* param4);
+bool VCMV_80087E34(void** param1, u32 size, MEMAllocator* allocator1, MEMAllocator* allocator2);
+void VCMV_80087EE4(void** param1);
+void VCMV_80088090(void); 
+void VCMV_80088654(MEMAllocator* param1, MEMAllocator* param2);
+void VCMV_80088660(void); 
+void VCMV_80088664(void); 
+void VCMV_80088668(UNKWORD param1, UNKWORD param2); 
+void VCMV_8008866C(s32 param1, s32 param2); 
+void VCMV_80088670(u16 param1); 
+void VCMV_80088674(void); 
+bool VCMV_80088678(u32 param1);
+void VCMV_8008876C(void);
+void VCMV_800887C4(void* param1); 
+char* VCMVRun(void* param1, char* param2, u8 param3);
+void VCMV_800887CC(char* param1); 
+void VCMV_800887D4(UNKWORD param1);
+bool VCMV_8008882C(void** param1, u32 size, MEMAllocator* allocator1, MEMAllocator* allocator2);
+void VCMV_800888DC(void** param1);
+void VCMV_80088934(void);
+void VCMV_80088994(void** param1);
+BOOL NETGetUniversalCalendar(OSCalendarTime* time);
 
-extern UnkStruct_801CA6B0 lbl_801CA6B0[];
-extern bool lbl_8025D2BE;
+extern HBMControllerData lbl_801CA670;
+
+// unk
+
+extern volatile UnkStruct_801CA6B0 lbl_801CA6B0[];
+extern volatile bool lbl_8025D2BE;
 extern bool lbl_8025D2BF;
 extern u8 lbl_8025D2D4;
 extern volatile UNKWORD lbl_8025D2D8;
 extern bool lbl_8025D2DC;
 extern u8 lbl_8025D2C2;
 extern UNKWORD lbl_8025D2C4;
-extern UNKWORD lbl_8025D2C8;
-extern UNKWORD lbl_8025D2CC;
+extern MEMAllocator* lbl_8025D2C8;
+extern MEMAllocator* lbl_8025D2CC;
 extern UNKWORD lbl_8025D2E0;
 extern UNKWORD lbl_8025D2E8;
 extern UNKWORD lbl_8025D2FC;

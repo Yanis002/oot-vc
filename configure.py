@@ -384,7 +384,7 @@ config.libs = [
             Object(NotLinked, "revolution/hbm/vcmv/code_800838C0.cpp"),
             Object(NotLinked, "revolution/hbm/vcmv/code_800867DC.cpp"),
             Object(LinkedFor("oot-j"), "revolution/hbm/vcmv/vcmv_javascript.cpp"),
-            Object(NotLinked, "revolution/hbm/vcmv/code_80086E38.cpp"),
+            Object(NotLinked, "revolution/hbm/vcmv/vcmv_main.cpp"),
             Object(NotLinked, "revolution/hbm/vcmv/code_800889E8.cpp"),
         ]
     ),

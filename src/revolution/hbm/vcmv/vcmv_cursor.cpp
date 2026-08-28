@@ -28,7 +28,7 @@ void VCMV_80083070(UNKWORD param1) {
 
     switch (param1) {
         case 0: {
-            UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
+            volatile UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
 
             if (!lbl_8025D2DC && ptr->unk_50 && lbl_8025D2D8 - lbl_8025D2E0 >= 0x0F) {
                 lbl_8025D2BF = true;
