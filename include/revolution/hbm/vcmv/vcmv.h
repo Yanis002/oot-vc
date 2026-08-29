@@ -33,12 +33,25 @@ typedef struct UnkStack20 {
 
 typedef struct UnkStruct_801CA6B0 {
     /* 00 */ u32 unk_00;
-    /* 04 */ char pad1[0x2C - 0x04];
+    /* 04 */ UNKWORD unk_04;
+    /* 08 */ UNKWORD unk_08;
+    /* 0C */ UNKWORD unk_0C;
+    /* 10 */ UNKWORD unk_10;
+    /* 14 */ UNKWORD unk_14;
+    /* 18 */ UNKWORD unk_18;
+    /* 1C */ f32 unk_1C;
+    /* 20 */ f32 unk_20;
+    /* 24 */ f32 unk_24;
+    /* 28 */ f32 unk_28;
     /* 2C */ f32 unk_2C;
     /* 30 */ f32 unk_30;
     /* 34 */ f32 unk_34;
     /* 38 */ f32 unk_38;
-    /* 3C */ char pad3[0x50 - 0x3C];
+    /* 3C */ UNKWORD unk_3C;
+    /* 40 */ UNKWORD unk_40;
+    /* 44 */ UNKWORD unk_44;
+    /* 48 */ UNKWORD unk_48;
+    /* 4C */ UNKWORD unk_4C;
     /* 50 */ bool unk_50;
 } UnkStruct_801CA6B0; // size = 0x54
 
@@ -185,10 +198,15 @@ void VCMV_80086E28(void);
 extern bool lbl_8025D2A4;
 
 // vcmv_main.cpp
+void VCMV_80086E38(volatile UnkStruct_801CA6B0* param1);
+void VCMV_80086FDC(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2);
+void VCMV_800870E8(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2);
 void VCMV_80087654(void);
-void VCMV_80087918(s32 param1, s32 param2, s32 param3, u8* param4);
+void VCMV_80087734(s32 param1, s32 param2, s32 param3, s32 param4, volatile UnkStruct_801CA6B0* param5);
+void VCMV_80087918(s32 param1, s32 param2, s32 param3, volatile UnkStruct_801CA6B0* param4);
 bool VCMV_80087E34(void** param1, u32 size, MEMAllocator* allocator1, MEMAllocator* allocator2);
 void VCMV_80087EE4(void** param1);
+void VCMV_80087F3C(void);
 void VCMV_80088090(void); 
 void VCMV_80088654(MEMAllocator* param1, MEMAllocator* param2);
 void VCMV_80088660(void); 

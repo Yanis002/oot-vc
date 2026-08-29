@@ -7,21 +7,21 @@
 extern "C" {
 #endif
 
-extern void (*WWWSurfaceInit)();
+extern UNKWORD (*WWWSurfaceInit)(u16, u16, u32, UNKWORD, void*);
 extern void (*WWWSurfaceNewScreen)();
 extern void (*WWWSurfaceDeleteScreen)();
 extern void (*WWWSurfaceResize)();
 extern void (*WWWSurfaceShutdown)();
-extern void (*WWWSurfaceSetFlushCallback)();
+extern UNKWORD (*WWWSurfaceSetFlushCallback)(void*, UNKWORD);
 extern void (*WWWSurfaceInvalidate)();
 extern void (*WWWSurfaceUpdateScreen)(UNKWORD);
 extern void (*WWWSurfaceLockArea)();
 extern void (*WWWSurfaceUnlockArea)();
-extern void (*WWWSurfaceMouseEvt)();
+extern void (*WWWSurfaceMouseEvt)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD);
 extern void (*WWWSurfaceWheelEvt)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD);
 extern void (*WWWSurfaceKeyboardEvt)();
 extern void (*WWWSurfaceAddFont)();
-extern void (*WWWCreateBrowser)();
+extern UNKWORD (*WWWCreateBrowser)(void*, void*, const char**, const char*);
 extern void (*WWWTerminateBrowser)();
 extern UNKWORD (*WWWRunSlice)(UNKWORD);
 extern UNKWORD (*WWWCreateBrowserWindow)(UNKWORD, void*, UNKWORD);
@@ -118,7 +118,7 @@ extern UNKWORD (*WWWProtocolWrite)(UNKWORD, void*, UNKWORD);
 extern UNKWORD (*WWWProtocolSetMimeType)(UNKWORD, const char*);
 extern UNKWORD (*WWWProtocolFinished)(UNKWORD);
 extern UNKWORD (*WWWProtocolFailed)(UNKWORD);
-extern void (*WWWAddProtocol)();
+extern void (*WWWAddProtocol)(const char*);
 
 #ifdef __cplusplus
 }
