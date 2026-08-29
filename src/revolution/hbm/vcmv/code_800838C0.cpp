@@ -976,7 +976,6 @@ void VCMV_80085798(const UnkStack20* param1) {
     GXEnd();
 }
 
-// non-matching
 void VCMV_80085874(void) {
     Mtx44 sp48;
 
@@ -986,7 +985,9 @@ void VCMV_80085874(void) {
         lbl_8025D292 = lbl_8025D27C;
     }
 
-    C_MTXOrtho(sp48, lbl_8025C8E8, -lbl_8025C8E8, -lbl_8025C8EC, lbl_8025C8EC, 0.0f, -1.0f);
+    f32 w = lbl_8025C8E8;
+    f32 h = lbl_8025C8EC;
+    C_MTXOrtho(sp48, h, -h, -w, w, 0.0f, -1.0f);
     GXSetProjection(sp48, GX_ORTHOGRAPHIC);
     GXSetNumTexGens(1);
     GXSetNumChans(0);
@@ -1043,19 +1044,25 @@ void VCMV_80085874(void) {
 
         s32 temp_r29 = lbl_801CA5D8.unk_20.unk_00 + lbl_801CA5D8.unk_20.unk_08;
         s32 temp_r28 = lbl_801CA5D8.unk_20.unk_04 + lbl_801CA5D8.unk_20.unk_0C;
+
         f32 temp_f31 = lbl_8025D24C * lbl_801CA5D8.unk_20.unk_00;
         f32 temp_f30 = lbl_8025D24C * temp_r29;
         f32 temp_f29 = lbl_8025D250 * lbl_801CA5D8.unk_20.unk_04;
         f32 temp_f28 = lbl_8025D250 * temp_r28;
+
         f32 temp_f27 = -lbl_8025C8E8 + lbl_801CA5D8.unk_20.unk_00;
         f32 temp_f26 = -lbl_8025C8E8 + temp_r29;
         f32 temp_f25 = lbl_8025C8EC - lbl_801CA5D8.unk_20.unk_04;
         f32 temp_f24 = lbl_8025C8EC - temp_r28;
+
         s32 temp_r6 = lbl_801CA5D8.unk_50 - lbl_801CA5D8.unk_00[lbl_801CA5D8.unk_30].unk_04;
-        f32 temp_f23 = (lbl_801CA5D8.unk_20.unk_04 + temp_r6) * lbl_8025D250;
+        s32 temp_r0_2 = lbl_801CA5D8.unk_20.unk_04 + temp_r6;
+        f32 temp_f23 = temp_r0_2 * lbl_8025D250;
         f32 temp_f22 = temp_f24 + temp_r6;
-        s32 temp_r3 = lbl_801CA5D8.unk_20.unk_04 + ((lbl_801CA5D8.unk_50 + (lbl_801CA5D8.unk_20.unk_0C - temp_r6)) -
-                                                    lbl_801CA5D8.unk_00[lbl_801CA5D8.unk_34].unk_04);
+
+        s32 temp_r3_3 = lbl_801CA5D8.unk_20.unk_0C - temp_r6;
+        s32 temp_r3_2 = lbl_801CA5D8.unk_50 + temp_r3_3 - lbl_801CA5D8.unk_00[lbl_801CA5D8.unk_34].unk_04;
+        s32 temp_r3 = lbl_801CA5D8.unk_20.unk_04 + temp_r3_2;
         s32 temp_r0 = temp_r3 + temp_r6;
         f32 temp_f21 = temp_r3 * lbl_8025D250;
         f32 temp_f20 = temp_r0 * lbl_8025D250;
@@ -1067,16 +1074,16 @@ void VCMV_80085874(void) {
                 GXBegin(GX_QUADS, GX_VTXFMT0, 4);
 
                 GXPosition3f32(-lbl_8025C8E8, lbl_8025C8EC, 0.0f);
-                GXPosition2f32(0.0f, 0.0f);
+                GXTexCoord2f32(0.0f, 0.0f);
 
                 GXPosition3f32(-lbl_8025C8E8, -lbl_8025C8EC, 0.0f);
-                GXPosition2f32(0.0f, 1.0f);
+                GXTexCoord2f32(0.0f, 1.0f);
 
                 GXPosition3f32(lbl_8025C8E8, -lbl_8025C8EC, 0.0f);
-                GXPosition2f32(1.0f, 1.0f);
+                GXTexCoord2f32(1.0f, 1.0f);
 
                 GXPosition3f32(lbl_8025C8E8, lbl_8025C8EC, 0.0f);
-                GXPosition2f32(1.0f, 0.0f);
+                GXTexCoord2f32(1.0f, 0.0f);
 
                 GXEnd();
             }
@@ -1226,12 +1233,12 @@ void VCMV_80085874(void) {
         temp_f11 *= 0.15f;
 
         f32 sp38[4];
-        f32 sp28[4];
         sp38[0] = (temp_f11 - 0.5f) * lbl_8025D240;
         sp38[1] = lbl_8025C8EC;
         sp38[2] = (temp_f11 + 0.5f) * lbl_8025D240;
         sp38[3] = -lbl_8025C8EC;
 
+        f32 sp28[4];
         sp28[0] = (temp_f8 - 0.5f) * lbl_8025D240;
         sp28[1] = lbl_8025C8EC;
         sp28[2] = (temp_f8 + 0.5f) * lbl_8025D240;

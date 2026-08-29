@@ -254,7 +254,7 @@ revolution/hbm/vcmv/code_800838C0.cpp:
 	.text       start:0x800838C0 end:0x800867DC
 	.ctors      start:0x8016A6E4 end:0x8016A6E8
 	.rodata     start:0x8016A840 end:0x8016A8A8
-	.data       start:0x801752F0 end:0x80175460
+	.data       start:0x801752F0 end:0x80175444
 	.bss        start:0x801CA1C8 end:0x801CA650
 	.sdata      start:0x8025C8E8 end:0x8025C8F8
 	.sbss       start:0x8025D228 end:0x8025D298
