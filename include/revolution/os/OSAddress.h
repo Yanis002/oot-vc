@@ -1,8 +1,8 @@
 #ifndef _RVL_SDK_OS_ADDRESS_H
 #define _RVL_SDK_OS_ADDRESS_H
 
-#include "revolution/types.h"
 #include "macros.h"
+#include "revolution/types.h"
 
 #ifdef __cplusplus
 extern "C" {

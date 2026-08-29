@@ -758,9 +758,9 @@ s32 VCMV_80084AAC(s32 param1, s32 param2) {
     var_r31 &= VCMV_80087E34((void**)&lbl_8025D230, lbl_8025D238, lbl_8025D2CC, lbl_8025D2C8);
 
     if (var_r31 != 0) {
-        var_r31 &=
-            VCMV_80087E34((void**)&lbl_8025D234, (((lbl_8025D242 * ((s32)(lbl_8025D240 + 0x7F) / 128)) * 4) + 0x1F) & ~0x1F,
-                          lbl_8025D2CC, lbl_8025D2C8);
+        var_r31 &= VCMV_80087E34((void**)&lbl_8025D234,
+                                 (((lbl_8025D242 * ((s32)(lbl_8025D240 + 0x7F) / 128)) * 4) + 0x1F) & ~0x1F,
+                                 lbl_8025D2CC, lbl_8025D2C8);
 
         if (var_r31 != 0) {
             return 1;
