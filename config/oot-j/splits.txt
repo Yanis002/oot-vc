@@ -274,8 +274,10 @@ revolution/hbm/vcmv/vcmv_main.cpp:
 	extabindex  start:0x80006AD8 end:0x80006BC8
 	.text       start:0x80086E38 end:0x800889D8
 	.rodata     start:0x8016A918 end:0x8016A9E8
-	.sbss       start:0x8025D338 end:0x8025D340
-	.sdata2     start:0x8025E0A0 end:0x8025E0D4
+	.bss        start:0x801CA670 end:0x801CC058
+	.sdata      start:0x8025C900 end:0x8025C908
+	.sbss       start:0x8025D2B8 end:0x8025D340
+	.sdata2     start:0x8025E0A0 end:0x8025E0E0
 
 revolution/hbm/vcmv/code_800889E8.cpp:
 	extab       start:0x80006650 end:0x80006688
