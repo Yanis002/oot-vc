@@ -238,17 +238,6 @@ revolution/NdevExi2AD/DebuggerDriver.c:
 revolution/NdevExi2AD/exi2.c:
 	.text       start:0x80080A8C end:0x80081218
 
-revolution/hbm/vcmv/vcmv_cursor.cpp:
-	extab       start:0x800064E0 end:0x800064F0
-	extabindex  start:0x800069A0 end:0x800069B8
-	.text       start:0x80081218 end:0x80081A68
-
-revolution/hbm/vcmv/code_800838C0.cpp:
-	extab       start:0x800064F0 end:0x80006688
-	extabindex  start:0x800069B8 end:0x80006C1C
-	.text       start:0x80081A68 end:0x8008754C
-	.ctors      start:0x80168844 end:0x80168848
-
 revolution/base/PPCArch.c:
 	.text       start:0x8008754C end:0x800876B0
 	.data       start:0x801746A0 end:0x801746D8
