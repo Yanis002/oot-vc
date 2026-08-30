@@ -13,29 +13,29 @@
 #include <strtoul.h>
 #include <time.h>
 
-extern UNKWORD fn_801004A8(void*);
-extern UnkStruct_80100070* fn_80100070(void*, const char*);
+extern "C" UNKWORD fn_801004A8(void*);
+extern "C" UnkStruct_80100070* fn_80100070(void*, const char*);
 
 //! TODO: fix those declarations and move them to the right header
-extern void __cvt_fp2unsigned();
-extern void __cvt_sll_dbl();
-extern void __div2i();
-extern void __mod2i();
-extern void __ptmf_scall();
-extern void __shl2i();
-extern void abort();
-extern void atol();
-extern void bsearch();
-extern void exp();
-extern void getenv();
-extern void itoa();
-extern void strcspn();
-extern void strnicmp();
-extern void strpbrk();
-extern void strrchr();
-extern void strspn();
-extern void strtol();
-extern void strtoul();
+extern "C" void __cvt_fp2unsigned();
+extern "C" void __cvt_sll_dbl();
+extern "C" void __div2i();
+extern "C" void __mod2i();
+extern "C" void __ptmf_scall();
+extern "C" void __shl2i();
+extern "C" void abort();
+extern "C" void atol();
+extern "C" void bsearch();
+extern "C" void exp();
+extern "C" void getenv();
+extern "C" void itoa();
+extern "C" void strcspn();
+extern "C" void strnicmp();
+extern "C" void strpbrk();
+extern "C" void strrchr();
+extern "C" void strspn();
+extern "C" void strtol();
+extern "C" void strtoul();
 
 const UnkStruct_80176360 lbl_8016B800[] = {
     {"ARCClose", (void*)ARCClose},

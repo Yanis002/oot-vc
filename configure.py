@@ -950,7 +950,7 @@ config.progress_categories = [
     ProgressCategory("metrotrk", "MetroTRK"),
 ]
 
-config.print_progress_categories = ["emulator", "vcmv"]
+config.print_progress_categories = ["emulator"]
 
 # Optional extra arguments to `objdiff-cli report generate`
 config.progress_report_args = [
