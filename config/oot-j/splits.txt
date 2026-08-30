@@ -280,9 +280,21 @@ revolution/hbm/vcmv/vcmv_main.cpp:
 	.sdata2     start:0x8025E0A0 end:0x8025E0E0
 
 revolution/hbm/vcmv/code_800889E8.cpp:
-	extab       start:0x80006650 end:0x80006688
-	extabindex  start:0x80006BC8 end:0x80006C1C
-	.text       start:0x800889D8 end:0x800893A4
+	extab       start:0x80006650 end:0x80006680
+	extabindex  start:0x80006BC8 end:0x80006C10
+	.text       start:0x800889D8 end:0x80089308
+	.rodata     start:0x8016A9E8 end:0x8016B390
+	.data       start:0x80175460 end:0x801766E0
+	.bss        start:0x801CC058 end:0x801CC120
+	.sdata      start:0x8025C908 end:0x8025C918
+	.sdata2     start:0x8025E0E0 end:0x8025E0F8
+
+revolution/hbm/vcmv/code_80089308.cpp:
+	extab       start:0x80006680 end:0x80006688
+	extabindex  start:0x80006C10 end:0x80006C1C
+	.text       start:0x80089308 end:0x800893A4
+	.rodata     start:0x8016B390 end:0x8016BCC0
+	.sdata2     start:0x8025E0F8 end:0x8025E2DC
 
 revolution/base/PPCArch.c:
 	.text       start:0x800893A4 end:0x80089508

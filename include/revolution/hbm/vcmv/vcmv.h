@@ -250,6 +250,81 @@ extern UNKWORD lbl_8025D2E0;
 extern UNKWORD lbl_8025D2E8;
 extern UNKWORD lbl_8025D2FC;
 
+// code_800889E8.cpp
+typedef struct UnkStruct_801CC058 {
+    /* 00 */ const char* unk_00;
+    /* 04 */ UNKWORD unk_04;
+    /* 08 */ UNKWORD unk_08;
+    /* 0C */ UNKWORD unk_0C;
+} UnkStruct_801CC058; // size = 0x10
+
+typedef struct UnkStruct_801CC088 {
+    /* 00 */ const char* path;
+    /* 04 */ void* buf;
+    /* 08 */ size_t len;
+} UnkStruct_801CC088; // size = 0x0C
+
+typedef struct UnkStruct_80088B94_Param2 {
+    /* 0000 */ u8 unk_0000[0x1000];
+    /* 1000 */ u8* unk_1000;
+    /* 1004 */ u32 unk_1004;
+    /* 1008 */ s32 unk_1008;
+    /* 100C */ u32 unk_100C;
+    /* 1010 */ u8 unk_1010;
+    /* 1014 */ u32 unk_1014;
+    /* 1018 */ s32 unk_1018;
+} UnkStruct_80088B94_Param2; // size = 0x101C
+
+typedef struct UnkStruct_8025D500 {
+    /* 00 */ UNKWORD unk_00;
+    /* 04 */ UNKWORD unk_04;
+    /* 08 */ UNKWORD unk_08;
+    /* 0C */ UNKWORD unk_0C;
+    /* 10 */ UNKWORD unk_10;
+    /* 14 */ UNKWORD unk_14;
+    /* 18 */ UNKWORD unk_18;
+    /* 1C */ UNKWORD unk_1C;
+    /* 20 */ UNKWORD unk_20;
+    /* 24 */ void (*unk_24)();
+    /* 28 */ void (*unk_28)();
+    /* 2C */ UNKWORD unk_2C;
+    /* 30 */ UNKWORD unk_30;
+    /* 34 */ UNKWORD unk_34;
+    /* 38 */ UNKWORD unk_38;
+    /* 3C */ UNKWORD unk_3C;
+    /* 40 */ UNKWORD unk_40;
+    /* 44 */ UNKWORD unk_44;
+    /* 48 */ UNKWORD unk_48;
+    /* 4C */ UNKWORD unk_4C;
+    /* 50 */ UNKWORD unk_50;
+    /* 54 */ UNKWORD unk_54;
+} UnkStruct_8025D500; // size = 0x58
+
+typedef struct UnkStruct_80176360 {
+    /* 00 */ const char* unk_00;
+    /* 04 */ void *unk_04;
+} UnkStruct_80176360; // size = 0x08
+
+typedef struct UnkStruct_80089308_0C {
+    /* 00 */ UNKWORD unk_00;
+    /* 04 */ UNKWORD unk_04;
+} UnkStruct_80089308_0C; // size = 0x08
+
+typedef struct UnkStruct_80089308 {
+    /* 00 */ UNKWORD unk_00;
+    /* 04 */ UNKWORD unk_04;
+    /* 08 */ UNKWORD unk_08;
+    /* 0C */ UnkStruct_80089308_0C *unk_0C;
+} UnkStruct_80089308; // size = 0x08
+
+typedef struct UnkStruct_80100070 {
+    /* 00 */ UNKWORD unk_00;
+    /* 04 */ UNKWORD unk_04;
+    /* 08 */ UNKWORD unk_08;
+} UnkStruct_80100070; // size = 0x08
+
+extern UnkStruct_801CC058 WWW_FONT_FILE_DATA_TABLE__[3];
+
 #ifdef __cplusplus
 }
 #endif

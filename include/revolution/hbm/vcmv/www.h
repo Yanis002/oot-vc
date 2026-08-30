@@ -20,7 +20,7 @@ extern void (*WWWSurfaceUnlockArea)();
 extern void (*WWWSurfaceMouseEvt)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD);
 extern void (*WWWSurfaceWheelEvt)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD);
 extern void (*WWWSurfaceKeyboardEvt)();
-extern void (*WWWSurfaceAddFont)();
+extern void (*WWWSurfaceAddFont)(const char*);
 extern UNKWORD (*WWWCreateBrowser)(void*, void*, const char**, const char*);
 extern void (*WWWTerminateBrowser)();
 extern UNKWORD (*WWWRunSlice)(UNKWORD);

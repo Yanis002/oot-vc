@@ -16,6 +16,8 @@ extract:
 # AXComp.c
 - symbol: __AXCompressorTable
   header: __AXCompressorTable.inc
+- symbol: lbl_80175460
+  header: lbl_80175460.inc
 
 force_active:
 - lbl_801E3380
