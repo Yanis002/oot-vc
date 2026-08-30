@@ -13,9 +13,6 @@
 
 #include <string.h>
 
-extern "C" void fn_800889E8(void);
-extern "C" void fn_800891B4(void);
-extern "C" void fn_80089224(void);
 extern "C" void fn_800CAFB8(int index, KPADStatus* pStatus, UNKWORD);
 
 static s32 lbl_8025D2B8;
@@ -621,7 +618,7 @@ void VCMV_80087F3C(void) {
         OSPanic(__FILE__, 841, "Failed to init flush callback for WWW");
     }
 
-    fn_800889E8();
+    VCMV_800889E8();
 
     sp8[0] = "Wii NTLG PGothic";
     sp8[1] = "Wii NTLG PGothic";
@@ -809,9 +806,9 @@ void VCMV_80088654(MEMAllocator* param1, MEMAllocator* param2) {
     lbl_8025D2CC = param2;
 }
 
-void VCMV_80088660(void) { fn_800891B4(); }
+void VCMV_80088660(void) { VCMV_800891B4(); }
 
-void VCMV_80088664(void) { fn_80089224(); }
+void VCMV_80088664(void) { VCMV_80089224(); }
 
 void VCMV_80088668(UNKWORD param1, UNKWORD param2) { VCMV_80084A34(param1, param2); }
 

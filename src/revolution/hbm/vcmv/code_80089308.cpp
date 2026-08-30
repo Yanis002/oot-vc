@@ -3,15 +3,39 @@
 #include "revolution.h"
 #include "revolution/hbm/vcmv/vcmv.h"
 #include "runtime/MWCPlusLib.h"
+#include "runtime/Gecko_setjmp.h"
 
 #include <math.h>
 #include <printf.h>
 #include <string.h>
+#include <locale.h>
+#include <strtoul.h>
+#include <time.h>
+#include <stdlib.h>
 
-extern "C" {
 extern UNKWORD fn_801004A8(void*);
-
 extern UnkStruct_80100070* fn_80100070(void*, const char*);
+
+//! TODO: fix those declarations and move them to the right header
+extern void __cvt_fp2unsigned();
+extern void __cvt_sll_dbl();
+extern void __div2i();
+extern void __mod2i();
+extern void __ptmf_scall();
+extern void __shl2i();
+extern void abort();
+extern void atol();
+extern void bsearch();
+extern void exp();
+extern void getenv();
+extern void itoa();
+extern void strcspn();
+extern void strnicmp();
+extern void strpbrk();
+extern void strrchr();
+extern void strspn();
+extern void strtol();
+extern void strtoul();
 
 const UnkStruct_80176360 lbl_8016B800[] = {
     {"ARCClose", (void*)ARCClose},
@@ -70,79 +94,80 @@ const UnkStruct_80176360 lbl_8016B800[] = {
     {"_SDA_BASE_", (void*)_SDA_BASE_},
     {"__construct_array", (void*)__construct_array},
     {"__construct_new_array", (void*)__construct_new_array},
-    // {"__cvt_fp2unsigned", (void*)__cvt_fp2unsigned},
-    // {"__cvt_sll_dbl", (void*)__cvt_sll_dbl},
+    {"__cvt_fp2unsigned", (void*)__cvt_fp2unsigned},
+    {"__cvt_sll_dbl", (void*)__cvt_sll_dbl},
     {"__destroy_arr", (void*)__destroy_arr},
-    // {"__div2i", (void*)__div2i},
+    {"__div2i", (void*)__div2i},
     {"__double_huge", (void*)__double_huge},
     {"__files", (void*)__files},
-    // {"__mod2i", (void*)__mod2i},
-    // {"__ptmf_scall", (void*)__ptmf_scall},
-    // {"__setjmp", (void*)__setjmp},
-    // {"__shl2i", (void*)__shl2i},
+    {"__mod2i", (void*)__mod2i},
+    {"__ptmf_scall", (void*)__ptmf_scall},
+    {"__setjmp", (void*)__setjmp},
+    {"__shl2i", (void*)__shl2i},
     {"__va_arg", (void*)__va_arg},
-    // {"_current_locale", (void*)_current_locale},
-    // {"abort", (void*)abort},
-    // {"abs", (void*)abs},
+    {"_current_locale", (void*)&_current_locale},
+    {"abort", (void*)abort},
+    {"abs", (void*)abs},
     {"acos", (void*)acos},
     {"asin", (void*)asin},
     {"atan", (void*)atan},
     {"atan2", (void*)atan2},
-    // {"atoi", (void*)atoi},
-    // {"atol", (void*)atol},
-    // {"bsearch", (void*)bsearch},
+    {"atoi", (void*)atoi},
+    {"atol", (void*)atol},
+    {"bsearch", (void*)bsearch},
     {"ceil", (void*)ceil},
-    // {"clock", (void*)clock},
+    {"clock", (void*)clock},
     {"cos", (void*)cos},
     {"exit", (void*)exit},
-    // {"exp", (void*)exp},
+    {"exp", (void*)exp},
     {"floor", (void*)floor},
     {"fmod", (void*)fmod},
     {"fprintf", (void*)fprintf},
-    // {"getenv", (void*)getenv},
-    // {"itoa", (void*)itoa},
-    // {"labs", (void*)labs},
-    // {"localtime", (void*)localtime},
+    {"getenv", (void*)getenv},
+    {"itoa", (void*)itoa},
+    {"labs", (void*)labs},
+    {"localtime", (void*)localtime},
     {"log", (void*)log},
-    // {"longjmp", (void*)longjmp},
+    {"longjmp", (void*)longjmp},
     {"memchr", (void*)memchr},
     {"memcmp", (void*)memcmp},
     {"memcpy", (void*)memcpy},
     {"memmove", (void*)memmove},
     {"memset", (void*)memset},
-    // {"mktime", (void*)mktime},
+    {"mktime", (void*)mktime},
     {"pow", (void*)pow},
     {"printf", (void*)printf},
-    // {"qsort", (void*)qsort},
-    // {"rand", (void*)rand},
+    {"qsort", (void*)qsort},
+    {"rand", (void*)rand},
     {"sin", (void*)sin},
     {"snprintf", (void*)snprintf},
     {"sprintf", (void*)sprintf},
     {"sqrt", (void*)sqrt},
-    // {"srand", (void*)srand},
+    {"srand", (void*)srand},
     {"sscanf", (void*)sscanf},
     {"strcat", (void*)strcat},
     {"strchr", (void*)strchr},
     {"strcmp", (void*)strcmp},
     {"strcpy", (void*)strcpy},
-    // {"strcspn", (void*)strcspn},
-    // {"strftime", (void*)strftime},
+    {"strcspn", (void*)strcspn},
+    {"strftime", (void*)strftime},
     {"stricmp", (void*)stricmp},
     {"strlen", (void*)strlen},
     {"strncat", (void*)strncat},
     {"strncmp", (void*)strncmp},
     {"strncpy", (void*)strncpy},
-    // {"strnicmp", (void*)strnicmp},
-    // {"strpbrk", (void*)strpbrk},
-    // {"strrchr", (void*)strrchr},
-    // {"strspn", (void*)strspn},
+    {"strnicmp", (void*)strnicmp},
+    {"strpbrk", (void*)strpbrk},
+    {"strrchr", (void*)strrchr},
+    {"strspn", (void*)strspn},
     {"strstr", (void*)strstr},
-    // {"strtol", (void*)strtol},
-    // {"strtoul", (void*)strtoul},
+    {"strtol", (void*)strtol},
+    {"strtoul", (void*)strtoul},
     {"tan", (void*)tan},
     {"vprintf", (void*)vprintf},
     {"vsnprintf", (void*)vsnprintf},
     {"vsprintf", (void*)vsprintf},
+    {"", nullptr},
 };
 
 FORCE_ACTIVE(code_80089308, "!!!!!Prolog!!!!!\n");
@@ -151,7 +176,7 @@ FORCE_ACTIVE(code_80089308, "!!!!!Epilog!!!!!\n");
 FORCE_ACTIVE(code_80089308, "RSO Module : call destructor (%08x)\n");
 FORCE_ACTIVE(code_80089308, "\n[Error]: Unlinked function was called.\n");
 
-void fn_80089308(UnkStruct_80089308* param1) {
+void VCMV_80089308(UnkStruct_80089308* param1) {
     UnkStruct_80089308* new_var;
 
     if (fn_801004A8(new_var = param1) == 0) {
@@ -164,5 +189,4 @@ void fn_80089308(UnkStruct_80089308* param1) {
             temp_r3->unk_04 = ((uintptr_t)ptr->unk_04) - new_var->unk_0C[temp_r3->unk_08].unk_00;
         }
     }
-}
 }

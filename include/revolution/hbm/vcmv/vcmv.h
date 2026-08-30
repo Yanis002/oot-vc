@@ -317,13 +317,25 @@ typedef struct UnkStruct_80089308 {
     /* 0C */ UnkStruct_80089308_0C *unk_0C;
 } UnkStruct_80089308; // size = 0x08
 
+void VCMV_800889D8(void);
+void VCMV_800889E8(void);
+bool VCMV_80088A34(void);
+void VCMV_80088B94(u8* param1, UnkStruct_80088B94_Param2* param2, u32 param3);
+s32 VCMV_80088D84(void);
+s32 VCMV_80089060(void);
+s32 VCMV_800891B4(void);
+void VCMV_80089224(void);
+
+extern UnkStruct_801CC058 WWW_FONT_FILE_DATA_TABLE__[3];
+
+// code_80089308.cpp
 typedef struct UnkStruct_80100070 {
     /* 00 */ UNKWORD unk_00;
     /* 04 */ UNKWORD unk_04;
     /* 08 */ UNKWORD unk_08;
 } UnkStruct_80100070; // size = 0x08
 
-extern UnkStruct_801CC058 WWW_FONT_FILE_DATA_TABLE__[3];
+void VCMV_80089308(UnkStruct_80089308* param1);
 
 #ifdef __cplusplus
 }

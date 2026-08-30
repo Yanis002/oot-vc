@@ -9,18 +9,127 @@
 
 #include <stdlib.h>
 
-extern "C" void fn_80089308(UnkStruct_80089308* param1);
 extern "C" s32 fn_80100600(UnkStruct_8025D500* param1, UNKWORD param2);
 extern "C" UNKWORD fn_80100010(UnkStruct_8025D500* param1, const char* param2);
 extern "C" void fn_801005F8(UnkStruct_8025D500* param1, void* param2);
-
-extern u8* lbl_8025D504;
-extern u8* lbl_8025D500;
 
 // required otherwise `VCMV_80088A34` won't match...
 #undef ATTRIBUTE_ALIGN
 #define ATTRIBUTE_ALIGN(...)
 #include "lbl_80175460.inc"
+
+UNKWORD (*WWWSurfaceInit)(u16, u16, u32, UNKWORD, void*) = nullptr;
+void (*WWWSurfaceNewScreen)() = nullptr;
+void (*WWWSurfaceDeleteScreen)() = nullptr;
+void (*WWWSurfaceResize)() = nullptr;
+void (*WWWSurfaceShutdown)() = nullptr;
+UNKWORD (*WWWSurfaceSetFlushCallback)(void*, UNKWORD) = nullptr;
+void (*WWWSurfaceInvalidate)() = nullptr;
+void (*WWWSurfaceUpdateScreen)(UNKWORD) = nullptr;
+void (*WWWSurfaceLockArea)() = nullptr;
+void (*WWWSurfaceUnlockArea)() = nullptr;
+void (*WWWSurfaceMouseEvt)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD) = nullptr;
+void (*WWWSurfaceWheelEvt)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD) = nullptr;
+void (*WWWSurfaceKeyboardEvt)() = nullptr;
+void (*WWWSurfaceAddFont)(const char*) = nullptr;
+UNKWORD (*WWWCreateBrowser)(void*, void*, const char**, const char*) = nullptr;
+void (*WWWTerminateBrowser)() = nullptr;
+UNKWORD (*WWWRunSlice)(UNKWORD) = nullptr;
+UNKWORD (*WWWCreateBrowserWindow)(UNKWORD, void*, UNKWORD) = nullptr;
+void (*WWWCloseBrowserWindow)(UNKWORD, UNKWORD) = nullptr;
+void (*WWWSetBrowserWindowTransparent)() = nullptr;
+void (*WWWGetBrowserWindowRect)() = nullptr;
+void (*WWWSetBrowserWindowRect)(UNKWORD, void*) = nullptr;
+void (*WWWRaiseBrowserWindow)(UNKWORD) = nullptr;
+void (*WWWLowerBrowserWindow)() = nullptr;
+void (*WWWShowBrowserWindow)(UNKWORD) = nullptr;
+void (*WWWHideBrowserWindow)() = nullptr;
+void (*WWWCommitIme)() = nullptr;
+void (*WWWUpdateIme)() = nullptr;
+void (*WWWPostUrl)() = nullptr;
+void (*WWWOpenUrl)(UNKWORD, const char*) = nullptr;
+void (*WWWGetHistoryCount)() = nullptr;
+void (*WWWNextPage)(UNKWORD) = nullptr;
+void (*WWWPrevPage)(UNKWORD) = nullptr;
+void (*WWWMoveInHistory)() = nullptr;
+void (*WWWStop)() = nullptr;
+void (*WWWReload)() = nullptr;
+void (*WWWReflow)() = nullptr;
+void (*WWWSearch)() = nullptr;
+void (*WWWResetSearch)() = nullptr;
+void (*WWWSetFocus)(UNKWORD) = nullptr;
+void (*WWWLoseFocus)() = nullptr;
+void (*WWWHistory)() = nullptr;
+void (*WWWClearHistory)() = nullptr;
+void (*WWWGetTrueZoom)() = nullptr;
+void (*WWWSetTrueZoom)() = nullptr;
+void (*WWWGetZoom)() = nullptr;
+void (*WWWSetZoom)() = nullptr;
+void (*WWWGetSecurityMode)() = nullptr;
+void (*WWWGetScroll)() = nullptr;
+void (*WWWSetScroll)() = nullptr;
+void (*WWWSetRenderingMode)(UNKWORD, UNKWORD) = nullptr;
+void (*WWWGetRenderingMode)() = nullptr;
+void (*WWWSetImageMode)(UNKWORD, UNKWORD) = nullptr;
+void (*WWWCreateCertificateManager)() = nullptr;
+void (*WWWCloseCertificateManager)() = nullptr;
+void (*WWWGetNumberOfCertificates)() = nullptr;
+void (*WWWSetLanguageEncoding)() = nullptr;
+void (*WWWGetDocumentIcon)() = nullptr;
+void (*WWWGetDocumentIconUrl)() = nullptr;
+void (*WWWClearCookies)() = nullptr;
+void (*WWWGetDocumentSize)() = nullptr;
+void (*WWWSetIntPref)() = nullptr;
+void (*WWWGetIntPref)() = nullptr;
+void (*WWWSetStringPref)() = nullptr;
+void (*WWWGetStringPref)() = nullptr;
+void (*WWWCommitPrefs)() = nullptr;
+void (*WWWSetFocusColors)() = nullptr;
+void (*WWWSetScrollbarColors)() = nullptr;
+void (*WWWSetScrollbarSize)() = nullptr;
+void (*WWWSetWidgetColors)() = nullptr;
+void (*WWWSetDisabledWidgetColors)() = nullptr;
+void (*WWWSetButtonWidgetColors)() = nullptr;
+void (*WWWSetUastringExtension)() = nullptr;
+void (*WWWMarkNextItemInDirection)() = nullptr;
+void (*WWWResetNavigation)() = nullptr;
+void (*WWWClearHighlight)() = nullptr;
+void (*WWWSetHighlight)() = nullptr;
+void (*WWWGetActiveLinkType)() = nullptr;
+void (*WWWGetBrowserAllocationFunctions)(void*, u32, void*, void*, void*) = nullptr;
+void (*WWWShutdownBrowserAllocationFunctions)() = nullptr;
+void (*WWWSetAllocationFunctions)(UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD, UNKWORD) = nullptr;
+void (*WWWHTTPCreateHttpLib)() = nullptr;
+void (*WWWHTTPTerminateHttpLib)() = nullptr;
+void (*WWWHTTPSessionRunSlice)() = nullptr;
+void (*WWWHTTPInitSession)() = nullptr;
+void (*WWWHTTPDeleteSession)() = nullptr;
+void (*WWWHTTPSetSessionHeader)() = nullptr;
+void (*WWWHTTPRemoveSessionHeader)() = nullptr;
+void (*WWWHTTPRemoveAllSessionHeaders)() = nullptr;
+void (*WWWHTTPCreateRequest)() = nullptr;
+void (*WWWHTTPDeleteRequest)() = nullptr;
+void (*WWWHTTPSetRequestHeader)() = nullptr;
+void (*WWWHTTPGetRequestHeader)() = nullptr;
+void (*WWWHTTPRemoveRequestHeader)() = nullptr;
+void (*WWWHTTPRemoveAllRequestHeaders)() = nullptr;
+void (*WWWHTTPGetResponseHeader)() = nullptr;
+void (*WWWHTTPGetResponseHeaders)() = nullptr;
+void (*WWWHTTPIssue)() = nullptr;
+void (*WWWHTTPNbActiveRequests)() = nullptr;
+void (*WWWHTTPPostBodyData)() = nullptr;
+void (*WWWHTTPSetAuthCredentials)() = nullptr;
+void (*WWWHTTPRemoveAuthCredentials)() = nullptr;
+void (*WWWHTTPSetProxy)() = nullptr;
+void (*WWWHTTPRemoveProxy)() = nullptr;
+void (*WWWHTTPEndLoading)() = nullptr;
+void (*WWWAddJSPlugin)(const char*, void*, void*, void*, void*) = nullptr;
+void (*WWWAddNSPlugin)() = nullptr;
+UNKWORD (*WWWProtocolWrite)(UNKWORD, void*, UNKWORD) = nullptr;
+UNKWORD (*WWWProtocolSetMimeType)(UNKWORD, const char*) = nullptr;
+UNKWORD (*WWWProtocolFinished)(UNKWORD) = nullptr;
+UNKWORD (*WWWProtocolFailed)(UNKWORD) = nullptr;
+void (*WWWAddProtocol)(const char*) = nullptr;
 
 UnkStruct_80176360 lbl_80176360[] = {
     {"WWWSurfaceInit", (void*)&WWWSurfaceInit},
@@ -141,11 +250,11 @@ UnkStruct_801CC058 WWW_FONT_FILE_DATA_TABLE__[3];
 UnkStruct_801CC088 lbl_801CC088;
 NANDFileInfo lbl_801CC094;
 
+static u8* lbl_8025D500 = nullptr;
+static u8* lbl_8025D504 = nullptr;
+
 const char* lbl_8025C908[] = {"WiiNTLG-Regular.ttc", ""};
 const char* lbl_8025C910[] = {"Regular"};
-
-extern "C" {
-void fn_800889D8(void);
 
 static inline void UnknownInline1(UnkStruct_8025D500* temp_r30) {
     for (u32 var_r29 = 0; var_r29 < 0x70; var_r29++) {
@@ -153,16 +262,16 @@ static inline void UnknownInline1(UnkStruct_8025D500* temp_r30) {
     }
 }
 
-void fn_800889D8(void) { OSReport("\nError: call www unlinked function.\n"); }
+void VCMV_800889D8(void) { OSReport("\nError: call www unlinked function.\n"); }
 
-void fn_800889E8(void) {
+void VCMV_800889E8(void) {
     for (UnkStruct_801CC058* var_r31 = WWW_FONT_FILE_DATA_TABLE__; var_r31->unk_00 != nullptr; var_r31++) {
         WWWSurfaceAddFont(var_r31->unk_00);
     }
 }
 
-bool fn_80088A34(void) {
-    fn_80089308((UnkStruct_80089308*)&lbl_80175460);
+bool VCMV_80088A34(void) {
+    VCMV_80089308((UnkStruct_80089308*)&lbl_80175460);
 
     UnkStruct_801CC088* ptr = &lbl_801CC088;
 
@@ -207,7 +316,7 @@ bool fn_80088A34(void) {
     return true;
 }
 
-void fn_80088B94(u8* param1, UnkStruct_80088B94_Param2* param2, u32 param3) {
+void VCMV_80088B94(u8* param1, UnkStruct_80088B94_Param2* param2, u32 param3) {
     u32 temp_r8;
     u32 temp_r0_2;
 
@@ -280,7 +389,7 @@ void fn_80088B94(u8* param1, UnkStruct_80088B94_Param2* param2, u32 param3) {
     }
 }
 
-s32 fn_80088D84(void) {
+s32 VCMV_80088D84(void) {
     UnkStruct_80088B94_Param2 spA0;
     UnkStruct_8025D500 sp48;
     CNTHandleNAND sp20;
@@ -315,7 +424,7 @@ s32 fn_80088D84(void) {
                         memset(&spA0, 0, sizeof(spA0));
                         spA0.unk_1004 = 0;
                         spA0.unk_1000 = spC;
-                        fn_80088B94((u8*)&sp48, &spA0, sizeof(sp48));
+                        VCMV_80088B94((u8*)&sp48, &spA0, sizeof(sp48));
                         temp_r3_5 = fn_80100600(&sp48, 2);
 
                         if (VCMV_80087E34((void**)&lbl_8025D500, (temp_r3_5 + 0x1F) & ~0x1F, lbl_8025D2C8,
@@ -324,7 +433,7 @@ s32 fn_80088D84(void) {
                         } else {
                             spA0.unk_1004 = 0;
                             spA0.unk_1000 = spC;
-                            fn_80088B94(lbl_8025D500, &spA0, temp_r3_5);
+                            VCMV_80088B94(lbl_8025D500, &spA0, temp_r3_5);
                             temp_r30 = (UnkStruct_8025D500*)lbl_8025D500;
 
                             if (temp_r30->unk_1C != 0) {
@@ -342,7 +451,7 @@ s32 fn_80088D84(void) {
                                 0) {
                                 var_r31 = -0xE14;
                             } else {
-                                fn_80088B94(sp8, &spA0, temp_r29);
+                                VCMV_80088B94(sp8, &spA0, temp_r29);
                                 VCMV_80087EE4((void**)&spC);
                                 temp_r4 = ((uintptr_t)sp8 - temp_r3_5) - (uintptr_t)temp_r30;
                                 temp_r30->unk_30 += temp_r4;
@@ -380,7 +489,7 @@ block_20:
     return var_r31;
 }
 
-s32 fn_80089060(void) {
+s32 VCMV_80089060(void) {
     CNTHandleNAND sp18;
     CNTFileInfoNAND sp8;
     s32 temp_r3;
@@ -398,12 +507,13 @@ s32 fn_80089060(void) {
         temp_r3_3 = contentConvertPathToEntrynumNAND(&sp18, lbl_8025C908[i]);
 
         if (temp_r3_3 >= 0 && contentFastOpenNAND(&sp18, temp_r3_3, &sp8) == 0) {
-            VCMV_80087E34((void**)&WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08, (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F,
-                          lbl_8025D2CC, lbl_8025D2C8);
-            WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_0C = (WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08 + contentGetLengthNAND(&sp8));
+            VCMV_80087E34((void**)&WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
+                          (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8);
+            WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_0C =
+                (WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08 + contentGetLengthNAND(&sp8));
 
-            if (contentReadNAND(&sp8, (void*)WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08, (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F,
-                                0) > 0) {
+            if (contentReadNAND(&sp8, (void*)WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
+                                (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, 0) > 0) {
                 WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_00 = lbl_8025C910[i];
 
                 if (contentCloseNAND(&sp8) == 0) {
@@ -425,7 +535,7 @@ s32 fn_80089060(void) {
     return 0;
 }
 
-s32 fn_800891B4(void) {
+s32 VCMV_800891B4(void) {
     static bool lbl_8025C914 = true;
 
     lbl_8025D2C0 = 0;
@@ -433,15 +543,15 @@ s32 fn_800891B4(void) {
     if (lbl_8025C914) {
         lbl_8025C914 = false;
 
-        if (fn_80088A34() == 0) {
+        if (VCMV_80088A34() == 0) {
             return 0;
         }
     }
 
-    s32 temp_r31 = fn_80089060();
+    s32 temp_r31 = VCMV_80089060();
 
-    if (fn_80089060() == 0) {
-        return fn_80088D84();
+    if (VCMV_80089060() == 0) {
+        return VCMV_80088D84();
     }
 
     return temp_r31;
@@ -449,7 +559,7 @@ s32 fn_800891B4(void) {
 
 #pragma push
 #pragma opt_unroll_loops off
-void fn_80089224(void) {
+void VCMV_80089224(void) {
     lbl_8025D2C1 = 0;
 
     if (lbl_8025D500 != NULL) {
@@ -458,7 +568,7 @@ void fn_80089224(void) {
         }
 
         for (int i = 0; i < 112; i++) {
-            *(UNKWORD*)lbl_80176360[i].unk_04 = (UNKWORD)fn_800889D8;
+            *(UNKWORD*)lbl_80176360[i].unk_04 = (UNKWORD)VCMV_800889D8;
         }
 
         VCMV_80087EE4((void**)&lbl_8025D504);
@@ -473,4 +583,3 @@ void fn_80089224(void) {
 #pragma pop
 
 int abs(int __x) { return labs(__x); }
-}

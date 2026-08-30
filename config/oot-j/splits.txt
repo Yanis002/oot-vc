@@ -287,6 +287,7 @@ revolution/hbm/vcmv/code_800889E8.cpp:
 	.data       start:0x80175460 end:0x801766E0
 	.bss        start:0x801CC058 end:0x801CC120
 	.sdata      start:0x8025C908 end:0x8025C918
+	.sbss       start:0x8025D340 end:0x8025D508
 	.sdata2     start:0x8025E0E0 end:0x8025E0F8
 
 revolution/hbm/vcmv/code_80089308.cpp:
@@ -294,7 +295,7 @@ revolution/hbm/vcmv/code_80089308.cpp:
 	extabindex  start:0x80006C10 end:0x80006C1C
 	.text       start:0x80089308 end:0x800893A4
 	.rodata     start:0x8016B390 end:0x8016BCC0
-	.sdata2     start:0x8025E0F8 end:0x8025E2DC
+	.sdata2     start:0x8025E0F8 end:0x8025E2D8
 
 revolution/base/PPCArch.c:
 	.text       start:0x800893A4 end:0x80089508
@@ -345,7 +346,7 @@ revolution/os/OSExec.c:
 	.bss        start:0x801CC200 end:0x801D7F00
 	.sdata      start:0x8025C958 end:0x8025C968
 	.sbss       start:0x8025D574 end:0x8025D57C
-	.sdata2     start:0x8025E2DC end:0x8025E2E0
+	.sdata2     start:0x8025E2D8 end:0x8025E2E0
 
 revolution/os/OSFatal.c:
 	.text       start:0x8008DCF4 end:0x8008E918
