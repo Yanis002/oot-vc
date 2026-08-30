@@ -302,7 +302,7 @@ typedef struct UnkStruct_8025D500 {
 
 typedef struct UnkStruct_80176360 {
     /* 00 */ const char* unk_00;
-    /* 04 */ void *unk_04;
+    /* 04 */ void* unk_04;
 } UnkStruct_80176360; // size = 0x08
 
 typedef struct UnkStruct_80089308_0C {
@@ -314,7 +314,7 @@ typedef struct UnkStruct_80089308 {
     /* 00 */ UNKWORD unk_00;
     /* 04 */ UNKWORD unk_04;
     /* 08 */ UNKWORD unk_08;
-    /* 0C */ UnkStruct_80089308_0C *unk_0C;
+    /* 0C */ UnkStruct_80089308_0C* unk_0C;
 } UnkStruct_80089308; // size = 0x08
 
 void VCMV_800889D8(void);

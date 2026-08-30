@@ -2,16 +2,16 @@
 #include "macros.h"
 #include "revolution.h"
 #include "revolution/hbm/vcmv/vcmv.h"
-#include "runtime/MWCPlusLib.h"
 #include "runtime/Gecko_setjmp.h"
+#include "runtime/MWCPlusLib.h"
 
+#include <locale.h>
 #include <math.h>
 #include <printf.h>
+#include <stdlib.h>
 #include <string.h>
-#include <locale.h>
 #include <strtoul.h>
 #include <time.h>
-#include <stdlib.h>
 
 extern UNKWORD fn_801004A8(void*);
 extern UnkStruct_80100070* fn_80100070(void*, const char*);
