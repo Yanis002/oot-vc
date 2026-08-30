@@ -582,4 +582,50 @@ void VCMV_80089224(void) {
 }
 #pragma pop
 
+#if VCMV_REVISION == 1
+extern UNKWORD lbl_8025D218;
+extern UNKWORD lbl_8025D21C;
+
+void VCMV_80083070(UNKWORD param1) {
+    if (lbl_8025D21C == param1 && lbl_8025D2D8 - lbl_8025D218 < 3) {
+        return;
+    }
+
+    lbl_8025D21C = param1;
+    lbl_8025D218 = lbl_8025D2D8;
+
+    switch (param1) {
+        case 0: {
+            volatile UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
+
+            if (!lbl_8025D2DC && ptr->unk_50 && lbl_8025D2D8 - lbl_8025D2E0 >= 0x0F) {
+                lbl_8025D2BF = true;
+            }
+
+            HBMPlaySound(0x17);
+            break;
+        }
+        case 1:
+            HBMPlaySound(0x18);
+            break;
+        case 2:
+            HBMPlaySound(0x16);
+            break;
+        case 3:
+            HBMPlaySound(0x1B);
+            break;
+        case 5:
+            HBMPlaySound(0x1A);
+            break;
+        default:
+            break;
+    }
+}
+
+void VCMV_80083140(void) {
+    lbl_8025D218 = lbl_8025D2D8;
+    lbl_8025D21C = -1;
+}
+#endif
+
 int abs(int __x) { return labs(__x); }

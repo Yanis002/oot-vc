@@ -8,6 +8,7 @@
 #include "revolution/os/OSTime.h"
 #include "revolution/tpl/TPL.h"
 #include "revolution/types.h"
+#include "versions.h"
 
 #ifdef __cplusplus
 extern "C" {

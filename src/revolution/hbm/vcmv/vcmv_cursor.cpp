@@ -6,8 +6,8 @@
 
 #include <string.h>
 
-static UNKWORD lbl_8025D218 = 0;
-static UNKWORD lbl_8025D21C = 0;
+UNKWORD lbl_8025D218 = 0;
+UNKWORD lbl_8025D21C = 0;
 static TPLPalette* lbl_8025D220 = nullptr;
 s32 lbl_8025D224;
 
@@ -18,6 +18,7 @@ static UnkStruct_80175290 lbl_80175290[] = {
     {50.0f, 50.0f, 0.38f, 0.92f, nullptr, {255, 156, 0, 255}}, // orange
 };
 
+#if VCMV_REVISION == 2
 void VCMV_80083070(UNKWORD param1) {
     if (lbl_8025D21C == param1 && lbl_8025D2D8 - lbl_8025D218 < 3) {
         return;
@@ -58,6 +59,7 @@ void VCMV_80083140(void) {
     lbl_8025D218 = lbl_8025D2D8;
     lbl_8025D21C = -1;
 }
+#endif
 
 void VCMV_80083154(void) {}
 
