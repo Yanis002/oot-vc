@@ -505,7 +505,7 @@ void VCMV_80087918(s32 param1, s32 param2, s32 param3, VCMV_VOLATILE UnkStruct_8
 
 void VCMV_800879E8(void) {
     static s32 lbl_8025D308 = 0;
-    
+
     bool value = false;
 
 #if VCMV_REVISION == 2
