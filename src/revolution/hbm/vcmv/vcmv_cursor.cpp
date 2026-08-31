@@ -6,11 +6,6 @@
 
 #include <string.h>
 
-UNKWORD lbl_8025D218 = 0;
-UNKWORD lbl_8025D21C = 0;
-static TPLPalette* lbl_8025D220 = nullptr;
-s32 lbl_8025D224;
-
 static UnkStruct_80175290 lbl_80175290[] = {
     {50.0f, 50.0f, 0.38f, 0.92f, nullptr, {0, 140, 255, 255}}, // blue
     {50.0f, 50.0f, 0.38f, 0.92f, nullptr, {255, 56, 56, 255}}, // red
@@ -19,6 +14,9 @@ static UnkStruct_80175290 lbl_80175290[] = {
 };
 
 #if VCMV_REVISION == 2
+static UNKWORD lbl_8025D218 = 0;
+static UNKWORD lbl_8025D21C = 0;
+
 void VCMV_80083070(UNKWORD param1) {
     if (lbl_8025D21C == param1 && lbl_8025D2D8 - lbl_8025D218 < 3) {
         return;
@@ -29,7 +27,7 @@ void VCMV_80083070(UNKWORD param1) {
 
     switch (param1) {
         case 0: {
-            volatile UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
+            VCMV_VOLATILE UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
 
             if (!lbl_8025D2DC && ptr->unk_50 && lbl_8025D2D8 - lbl_8025D2E0 >= 0x0F) {
                 lbl_8025D2BF = true;
@@ -59,9 +57,12 @@ void VCMV_80083140(void) {
     lbl_8025D218 = lbl_8025D2D8;
     lbl_8025D21C = -1;
 }
-#endif
 
 void VCMV_80083154(void) {}
+#endif
+
+static TPLPalette* lbl_8025D220 = nullptr;
+s32 lbl_8025D224;
 
 void VCMV_80083158(void) {}
 
@@ -99,7 +100,7 @@ void VCMV_8008315C(void** param1) {
 }
 
 void VCMV_8008345C(UNKWORD param1) {
-    volatile UnkStruct_801CA6B0* temp_r6 = &lbl_801CA6B0[param1];
+    VCMV_VOLATILE UnkStruct_801CA6B0* temp_r6 = &lbl_801CA6B0[param1];
     f32 unk_34;
     f32 unk_38;
     f32 temp_f8;

@@ -14,6 +14,7 @@
 #include <string.h>
 
 extern "C" void fn_800CAFB8(int index, KPADStatus* pStatus, UNKWORD);
+extern "C" void fn_800C8158();
 
 static s32 lbl_8025D2B8;
 static s8 lbl_8025D2BC;
@@ -42,19 +43,9 @@ static s32 lbl_8025D2F8;
 UNKWORD lbl_8025D2FC;
 static s32 lbl_8025D300;
 static s32 lbl_8025D304;
-static s32 lbl_8025D308;
-static void* lbl_8025D30C;
-static UNKWORD lbl_8025D310;
-static UNKWORD lbl_8025D314;
-static UNKWORD lbl_8025D318[2]; //! TODO: real?
-static OSThreadQueue lbl_8025D320;
-static s8 lbl_8025D328;
-static volatile UNKWORD lbl_8025D32C;
-static volatile UNKWORD lbl_8025D330;
-static volatile UNKWORD lbl_8025D334;
 
 HBMControllerData lbl_801CA670;
-volatile UnkStruct_801CA6B0 lbl_801CA6B0[4];
+VCMV_VOLATILE UnkStruct_801CA6B0 lbl_801CA6B0[4];
 static KPADStatus lbl_801CA800[4][10];
 static OSThread lbl_801CBD40;
 
@@ -102,9 +93,9 @@ static inline f32 UnknownInline4(f32 param1, f32 param2, UNKWORD param3, UNKWORD
     return param1 + (temp * param3 * param3 * (param4 - param3 * 0.6666667f));
 }
 
-void VCMV_80086E38(volatile UnkStruct_801CA6B0* param1) {
-    s32 var_r5;
+void VCMV_80086E38(VCMV_VOLATILE UnkStruct_801CA6B0* param1) {
     s32 var_r6;
+    s32 var_r5;
 
     // fixes .sdata2 ordering
     (void)3.0f;
@@ -143,7 +134,7 @@ void VCMV_80086E38(volatile UnkStruct_801CA6B0* param1) {
     }
 }
 
-void VCMV_80086FDC(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2) {
+void VCMV_80086FDC(VCMV_VOLATILE UnkStruct_801CA6B0* param1, KPADStatus* param2) {
     param1->unk_1C = (param2->pos.x * lbl_8025C8E8);
     param1->unk_20 = (param2->pos.y * lbl_8025C8EC);
     param1->unk_14 = (param1->unk_1C + lbl_8025C8E8);
@@ -180,7 +171,7 @@ void VCMV_80086FDC(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2) {
 
 #pragma push
 #pragma gen_fsel on // it won't generate the fsel otherwise
-void VCMV_800870E8(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2) {
+void VCMV_800870E8(VCMV_VOLATILE UnkStruct_801CA6B0* param1, KPADStatus* param2) {
     f32 temp_f0;
     f32 temp_f2;
     f32 temp_f2_2;
@@ -196,6 +187,15 @@ void VCMV_800870E8(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2) {
 
     param1->unk_24 = (param2->ex_status.cl.lstick.x * var_f5);
     param1->unk_28 = (-param2->ex_status.cl.lstick.y * var_f5);
+
+#if VCMV_REVISION == 1
+    param1->unk_1C = (param1->unk_24 * 4.0f) + param1->unk_1C;
+    param1->unk_20 = (param1->unk_28 * 4.0f) + param1->unk_20;
+    param1->unk_34 = param1->unk_1C;
+    param1->unk_38 = param1->unk_20;
+    param1->unk_14 = (param1->unk_1C + lbl_8025C8E8);
+#else
+    //! TODO: it was likely like above block but volatile probably makes it more funny to match
     temp_f2_2 = (param1->unk_24 * 4.0f) + param1->unk_1C;
     temp_f0 = (param1->unk_28 * 4.0f) + param1->unk_20;
 
@@ -204,6 +204,8 @@ void VCMV_800870E8(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2) {
     param1->unk_20 = temp_f0;
     param1->unk_38 = temp_f0;
     param1->unk_14 = (temp_f2_2 + lbl_8025C8E8);
+#endif
+
     param1->unk_18 = (param1->unk_20 + lbl_8025C8EC);
     param1->unk_04 = 0;
     param1->unk_30 = -0.2f;
@@ -240,7 +242,7 @@ void VCMV_8008725C(int index) {
     WPADResult temp_r31;
     u32 temp_r26;
     u32 var_r31;
-    volatile UnkStruct_801CA6B0* temp_r29;
+    VCMV_VOLATILE UnkStruct_801CA6B0* temp_r29;
     KPADStatus* temp_r28;
 
     temp_r29 = &lbl_801CA6B0[index];
@@ -320,16 +322,22 @@ void VCMV_8008725C(int index) {
             return;
     }
 
+#if VCMV_REVISION == 2
+#define FLOAT_CAST_HACK *(volatile f32*)&
+#else
+#define FLOAT_CAST_HACK
+#endif
+
     if (temp_r29->unk_1C < -lbl_8025C8E8) {
         temp_r29->unk_1C = -lbl_8025C8E8;
     } else if (temp_r29->unk_1C > lbl_8025C8E8) {
-        temp_r29->unk_1C = *(volatile f32*)&lbl_8025C8E8;
+        temp_r29->unk_1C = FLOAT_CAST_HACK lbl_8025C8E8;
     }
 
     if (temp_r29->unk_20 < -lbl_8025C8EC) {
         temp_r29->unk_20 = -lbl_8025C8EC;
     } else if (temp_r29->unk_20 > lbl_8025C8EC) {
-        temp_r29->unk_20 = *(volatile f32*)&lbl_8025C8EC;
+        temp_r29->unk_20 = FLOAT_CAST_HACK lbl_8025C8EC;
     }
 
     lbl_801CA670.wiiCon[index].kpad = temp_r28;
@@ -382,7 +390,7 @@ void VCMV_80087654(void) {
     VCMV_8008345C(lbl_8025D2D4);
 }
 
-void VCMV_80087734(s32 param1, s32 param2, s32 param3, s32 param4, volatile UnkStruct_801CA6B0* param5) {
+void VCMV_80087734(s32 param1, s32 param2, s32 param3, s32 param4, VCMV_VOLATILE UnkStruct_801CA6B0* param5) {
     s32 temp_r0;
     s32 var_r4;
 
@@ -431,17 +439,32 @@ void VCMV_80087734(s32 param1, s32 param2, s32 param3, s32 param4, volatile UnkS
 
         goto end;
     } else if (param1 == 1) {
+#if VCMV_REVISION == 1
+        if ((lbl_8025D279 | lbl_8025D26E | lbl_8025D2F1 | lbl_8025D2F2) == 0 &&
+            ((lbl_8025D300 == 0) || (var_r4 == 0))) {
+            lbl_8025D300 = 1;
+            goto block_29;
+        }
+#else
         if ((lbl_8025D300 == 0) || (var_r4 == 0)) {
             lbl_8025D300 = 1;
             goto block_29;
         }
+#endif
 
         goto end;
     } else if (param1 == 2) {
+#if VCMV_REVISION == 1
+        if (lbl_8025D300 != 0 || var_r4 == 0) {
+            lbl_8025D300 = 0;
+            goto block_29;
+        }
+#else
         if (lbl_8025D300 != 0) {
             lbl_8025D300 = 0;
             goto block_29;
         }
+#endif
 
         goto end;
     }
@@ -457,7 +480,7 @@ end:
     return;
 }
 
-void VCMV_80087918(s32 param1, s32 param2, s32 param3, volatile UnkStruct_801CA6B0* param4) {
+void VCMV_80087918(s32 param1, s32 param2, s32 param3, VCMV_VOLATILE UnkStruct_801CA6B0* param4) {
     s32 var_r31 = param2;
     s32 var_r30 = param3;
 
@@ -481,6 +504,11 @@ void VCMV_80087918(s32 param1, s32 param2, s32 param3, volatile UnkStruct_801CA6
 }
 
 void VCMV_800879E8(void) {
+    static s32 lbl_8025D308 = 0;
+    
+    bool value = false;
+
+#if VCMV_REVISION == 2
     if (lbl_8025D279 != 0) {
         if (lbl_8025C900 != 0) {
             lbl_8025C900 = 0;
@@ -495,14 +523,62 @@ void VCMV_800879E8(void) {
         return;
     }
 
-    if ((lbl_8025D279 | lbl_8025D26F | lbl_8025D2F1 | lbl_8025D2F2) == 0) {
+    value = lbl_8025D279 | lbl_8025D26F | lbl_8025D2F1 | lbl_8025D2F2;
+#endif
+
+    if (value == 0) {
+#if VCMV_REVISION == 1
+        lbl_8025D308++;
+#else
         lbl_8025D308 = lbl_8025D2D8;
+#endif
 
         if (lbl_8025D26F == 0) {
             for (int var_r28 = 0; var_r28 < ARRAY_COUNT(lbl_801CA6B0); var_r28++) {
-                volatile UnkStruct_801CA6B0* var_r29 = &lbl_801CA6B0[var_r28];
+                VCMV_VOLATILE UnkStruct_801CA6B0* var_r29 = &lbl_801CA6B0[var_r28];
 
                 if (var_r29->unk_00 != 0 && lbl_8025D2D4 == var_r28) {
+#if VCMV_REVISION == 1
+                    if (var_r29->unk_04 & 2) {
+                        s32 temp_r3 = lbl_8025D2D8 - var_r29->unk_40;
+
+                        if (temp_r3 >= 7) {
+                            if ((temp_r3 - 7) < 0x2C && !((temp_r3 - 7) % 4)) {
+                                VCMV_80087734(2, lbl_8025D246, var_r29->unk_18, 1, var_r29);
+                                VCMV_80087734(1, lbl_8025D246, var_r29->unk_18, 1, var_r29);
+                            } else {
+                                VCMV_80087734(0, lbl_8025D246, var_r29->unk_18, 1, var_r29);
+                            }
+                        }
+                    } else if (var_r29->unk_0C & 2) {
+                        VCMV_80087734(2, lbl_8025D246, var_r29->unk_18, 1, var_r29);
+                    } else if (((volatile UnkStruct_801CA6B0*)var_r29)->unk_08 & 1) {
+                        if (var_r29->unk_14 < lbl_8025D240 - 0x10) {
+                            lbl_8025D2F0 = 0;
+                            VCMV_80087734(0, var_r29->unk_14, var_r29->unk_18, 4, var_r29);
+                            VCMV_80087734(1, var_r29->unk_14, var_r29->unk_18, 1, var_r29);
+                            VCMV_80087734(2, var_r29->unk_14, var_r29->unk_18, 1, var_r29);
+                        } else {
+                            lbl_8025D2F0 = 1;
+                            lbl_8025D2EC = var_r29->unk_18;
+                            VCMV_80087734(0, var_r29->unk_14, var_r29->unk_18, 4, var_r29);
+                            VCMV_80087734(1, var_r29->unk_14, var_r29->unk_18, 1, var_r29);
+                        }
+                    } else if (var_r29->unk_0C & 1) {
+                        VCMV_80087734(2, var_r29->unk_14, var_r29->unk_18, 1, var_r29);
+                    } else {
+                        VCMV_80087734(0, var_r29->unk_14, var_r29->unk_18, 4, var_r29);
+                    }
+
+                    if (lbl_8025D279 != 0) {
+                        if (lbl_8025C900 != 0) {
+                            lbl_8025C900 = 0;
+                            VCMV_80087734(0, 0xA, 0xA, 4, var_r29);
+                        }
+                    } else {
+                        lbl_8025C900 = 1;
+                    }
+#else
                     if (var_r29->unk_08 & 1) {
                         if (var_r29->unk_14 < lbl_8025D240 - 0x10) {
                             lbl_8025D2F0 = 0;
@@ -520,6 +596,7 @@ void VCMV_800879E8(void) {
                     } else {
                         VCMV_80087734(0, var_r29->unk_14, var_r29->unk_18, 4, var_r29);
                     }
+#endif
 
                     if (lbl_8025D260 == lbl_8025C8F0 &&
                         (lbl_8025D279 | lbl_8025D26E | lbl_8025D2F1 | lbl_8025D2F2) == 0) {
@@ -554,15 +631,19 @@ void VCMV_800879E8(void) {
                         }
                     }
 
+#if VCMV_REVISION == 1
+                    var_r29->unk_0C = var_r29->unk_08 &= 0x40;
+#else
                     var_r29->unk_0C &= 0x40;
                     var_r29->unk_08 &= 0x40;
+#endif
                 }
             }
         }
     }
 
     for (int var_r28_2 = 0; var_r28_2 < ARRAY_COUNT(lbl_801CA6B0); var_r28_2++) {
-        volatile UnkStruct_801CA6B0* var_r30 = &lbl_801CA6B0[var_r28_2];
+        VCMV_VOLATILE UnkStruct_801CA6B0* var_r30 = &lbl_801CA6B0[var_r28_2];
 
         if (lbl_8025D2D4 == var_r28_2) {
             if (var_r30->unk_08 & 0x40) {
@@ -576,8 +657,10 @@ void VCMV_800879E8(void) {
                 }
             }
 
+#if VCMV_REVISION == 2
             var_r30->unk_0C &= ~0x40;
             var_r30->unk_08 &= ~0x40;
+#endif
         } else {
             if (var_r30->unk_08 & 0x01 || var_r30->unk_08 & 0x02) {
                 WPADControlMotor(lbl_8025D2D4, 0);
@@ -595,6 +678,16 @@ void VCMV_800879E8(void) {
     }
 }
 
+static void* lbl_8025D30C;
+static UNKWORD lbl_8025D310;
+static UNKWORD lbl_8025D314;
+static UNKWORD lbl_8025D318[2]; //! TODO: real?
+static OSThreadQueue lbl_8025D320;
+static s8 lbl_8025D328;
+static volatile UNKWORD lbl_8025D32C;
+static volatile UNKWORD lbl_8025D330;
+static volatile UNKWORD lbl_8025D334;
+
 bool VCMV_80087E34(void** param1, u32 size, MEMAllocator* allocator1, MEMAllocator* allocator2) {
     return UnknownInline3(param1, size, allocator1, allocator2);
 }
@@ -611,11 +704,11 @@ void VCMV_80087F3C(void) {
     s32 temp_r3;
 
     if (WWWSurfaceInit(lbl_8025D240, lbl_8025D242, lbl_8025D240 * 4, 0, lbl_8025D230) != 0) {
-        OSPanic(__FILE__, 838, "Failed to initialize WWW");
+        OSPanic(__FILE__, VCMV_REVISION == 1 ? 811 : 838, "Failed to initialize WWW");
     }
 
     if (WWWSurfaceSetFlushCallback((void*)VCMV_800840B4, 0) != 0) {
-        OSPanic(__FILE__, 841, "Failed to init flush callback for WWW");
+        OSPanic(__FILE__, VCMV_REVISION == 1 ? 814 : 841, "Failed to init flush callback for WWW");
     }
 
     VCMV_800889E8();
@@ -651,6 +744,10 @@ void* VCMV_80088098(void* arg) {
     GXColor sp8;
     f32 var_f1;
     u8 var_r30;
+
+#if VCMV_REVISION == 1
+    fn_800C8158();
+#endif
 
     memset((void*)lbl_801CA6B0, 0, sizeof(lbl_801CA6B0));
     lbl_8025D2D8 = 0x64;

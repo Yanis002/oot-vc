@@ -13,7 +13,7 @@ bool lbl_8025D2A4;
 static UNKWORD lbl_8025D2A8;
 static const char* lbl_8025D2AC;
 static UnkStruct_CommonFuncArg* lbl_8025D2B0;
-static s8 lbl_8025D2B4;
+bool lbl_8025D2B4;
 
 static const char* lbl_8025C8F8[] = {"vcJavaScriptExt"};
 
@@ -139,7 +139,7 @@ s32 VCMV_80086CCC(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFu
 
 s32 VCMV_80086D08(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4) {
     if (!lbl_8025D279 && lbl_8025D260 == lbl_8025C8F0 && !lbl_8025D26E) {
-        lbl_8025D2B4 = 1;
+        lbl_8025D2B4 = true;
         VCMV_80083070(0);
     }
     return 0x11;

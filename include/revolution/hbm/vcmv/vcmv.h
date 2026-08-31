@@ -14,6 +14,12 @@
 extern "C" {
 #endif
 
+#if VCMV_REVISION == 2
+#define VCMV_VOLATILE volatile
+#else
+#define VCMV_VOLATILE
+#endif
+
 typedef struct Rect {
     /* 00 */ f32 x0;
     /* 04 */ f32 y0;
@@ -149,6 +155,7 @@ extern volatile bool lbl_8025D288;
 extern f32 lbl_8025C8E8;
 extern f32 lbl_8025C8EC;
 extern UNKWORD lbl_8025C8F0;
+extern u16 lbl_8025D246;
 
 // vcmv_javascript.cpp
 typedef struct UnkStruct_CommonFuncArg {
@@ -197,17 +204,18 @@ UNKWORD VCMV_80086E20(void);
 void VCMV_80086E28(void);
 
 extern bool lbl_8025D2A4;
+extern bool lbl_8025D2B4;
 
 // vcmv_main.cpp
 typedef void (*Callback_8025D2D0)(s32, s32, u16, u16, s32, u32);
 
-void VCMV_80086E38(volatile UnkStruct_801CA6B0* param1);
-void VCMV_80086FDC(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2);
-void VCMV_800870E8(volatile UnkStruct_801CA6B0* param1, KPADStatus* param2);
+void VCMV_80086E38(VCMV_VOLATILE UnkStruct_801CA6B0* param1);
+void VCMV_80086FDC(VCMV_VOLATILE UnkStruct_801CA6B0* param1, KPADStatus* param2);
+void VCMV_800870E8(VCMV_VOLATILE UnkStruct_801CA6B0* param1, KPADStatus* param2);
 void VCMV_8008725C(int index);
 void VCMV_80087654(void);
-void VCMV_80087734(s32 param1, s32 param2, s32 param3, s32 param4, volatile UnkStruct_801CA6B0* param5);
-void VCMV_80087918(s32 param1, s32 param2, s32 param3, volatile UnkStruct_801CA6B0* param4);
+void VCMV_80087734(s32 param1, s32 param2, s32 param3, s32 param4, VCMV_VOLATILE UnkStruct_801CA6B0* param5);
+void VCMV_80087918(s32 param1, s32 param2, s32 param3, VCMV_VOLATILE UnkStruct_801CA6B0* param4);
 void VCMV_800879E8(void);
 bool VCMV_80087E34(void** param1, u32 size, MEMAllocator* allocator1, MEMAllocator* allocator2);
 void VCMV_80087EE4(void** param1);
@@ -235,7 +243,7 @@ void VCMV_80088994(void** param1);
 BOOL NETGetUniversalCalendar(OSCalendarTime* time);
 
 extern HBMControllerData lbl_801CA670;
-extern volatile UnkStruct_801CA6B0 lbl_801CA6B0[4];
+extern VCMV_VOLATILE UnkStruct_801CA6B0 lbl_801CA6B0[4];
 extern volatile bool lbl_8025D2BE;
 extern volatile bool lbl_8025D2BF;
 extern bool lbl_8025D2C0;

@@ -380,12 +380,12 @@ config.libs = [
     RevolutionVCMVLib(
         "vcmv",
         [
-            Object(LinkedFor("sm64-e", *MK64, *OOT), "revolution/hbm/vcmv/vcmv_cursor.cpp"),
-            Object(LinkedFor("sm64-e", *MK64, *OOT), "revolution/hbm/vcmv/code_800838C0.cpp"),
-            Object(LinkedFor("sm64-e", *MK64, *OOT), "revolution/hbm/vcmv/vcmv_javascript.cpp"),
-            Object(LinkedFor("sm64-e", *MK64, *OOT), "revolution/hbm/vcmv/vcmv_main.cpp"),
-            Object(LinkedFor("sm64-e", *MK64, *OOT), "revolution/hbm/vcmv/code_800889E8.cpp"),
-            Object(LinkedFor("sm64-e", *MK64, *OOT), "revolution/hbm/vcmv/code_80089308.cpp"),
+            Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/hbm/vcmv/vcmv_cursor.cpp"),
+            Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/hbm/vcmv/code_800838C0.cpp"),
+            Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/hbm/vcmv/vcmv_javascript.cpp"),
+            Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/hbm/vcmv/vcmv_main.cpp"),
+            Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/hbm/vcmv/code_800889E8.cpp"),
+            Object(LinkedFor(*SM64, *MK64, *OOT), "revolution/hbm/vcmv/code_80089308.cpp"),
         ]
     ),
     RevolutionLib(

@@ -389,6 +389,92 @@ void VCMV_80088B94(u8* param1, UnkStruct_80088B94_Param2* param2, u32 param3) {
     }
 }
 
+#if VCMV_REVISION == 1
+s32 VCMV_80088D84(void) {
+    UnkStruct_80088B94_Param2 spA0;
+    UnkStruct_8025D500 sp48;
+    CNTHandleNAND sp20;
+    CNTFileInfoNAND sp10;
+    u8* spC;
+    u8* sp8;
+    s32 temp_r4;
+    s32 var_r31;
+    s32 temp_r3_5;
+    s32 temp_r29;
+    UnkStruct_8025D500* temp_r30;
+
+    spC = nullptr;
+    sp8 = nullptr;
+
+    var_r31 = contentInitHandleNAND(2, &sp20, lbl_8025D2CC);
+
+    if (var_r31 == 0) {
+        if (contentOpenNAND(&sp20, "wwwlib-rvl.lz7", &sp10) == 0) {
+            if (VCMV_80087E34((void**)&spC, (contentGetLengthNAND(&sp10) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8) !=
+                0) {
+                contentReadNAND(&sp10, spC, (contentGetLengthNAND(&sp10) + 0x1F) & ~0x1F, 0);
+                contentCloseNAND(&sp10);
+
+                memset(&spA0, 0, sizeof(spA0));
+                spA0.unk_1004 = 0;
+                spA0.unk_1000 = spC;
+                VCMV_80088B94((u8*)&sp48, &spA0, sizeof(sp48));
+                temp_r3_5 = fn_80100600(&sp48, 2);
+
+                if (VCMV_80087E34((void**)&lbl_8025D500, (temp_r3_5 + 0x1F) & ~0x1F, lbl_8025D2C8, lbl_8025D2CC) != 0) {
+                    spA0.unk_1004 = 0;
+                    spA0.unk_1000 = spC;
+                    VCMV_80088B94(lbl_8025D500, &spA0, temp_r3_5);
+                    temp_r30 = (UnkStruct_8025D500*)lbl_8025D500;
+
+                    if (temp_r30->unk_1C != 0) {
+                        if (VCMV_80087E34((void**)&lbl_8025D504, temp_r30->unk_1C, lbl_8025D2C8, lbl_8025D2CC) == 0) {
+                            goto block_20; //! TODO: can we get rid of that?
+                        }
+
+                        memset(lbl_8025D504, 0, temp_r30->unk_1C);
+                    }
+
+                    temp_r29 = 0x902420 - temp_r3_5;
+                    if (VCMV_80087E34((void**)&sp8, (temp_r29 + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8) != 0) {
+                        VCMV_80088B94(sp8, &spA0, temp_r29);
+                        VCMV_80087EE4((void**)&spC);
+                        temp_r4 = ((uintptr_t)sp8 - temp_r3_5) - (uintptr_t)temp_r30;
+                        temp_r30->unk_30 += temp_r4;
+                        temp_r30->unk_38 += temp_r4;
+                        temp_r30->unk_4C += temp_r4;
+                        temp_r30->unk_54 += temp_r4;
+                        fn_801005F8(temp_r30, lbl_8025D504);
+
+                        if (temp_r30->unk_24 != NULL) {
+                            temp_r30->unk_24();
+                        }
+
+                        UnknownInline1(temp_r30);
+
+                        VCMV_80087EE4((void**)&sp8);
+
+                        contentReleaseHandleNAND(&sp20);
+
+                    offset_0x244:
+                        lbl_8025D2C1 = 1;
+                        return 0;
+                    }
+                }
+            }
+        }
+    } else {
+        goto offset_0x244;
+    }
+
+block_20:
+    VCMV_80087EE4((void**)&sp8);
+    VCMV_80087EE4((void**)&lbl_8025D504);
+    VCMV_80087EE4((void**)&lbl_8025D500);
+    VCMV_80087EE4((void**)&spC);
+    return var_r31;
+}
+#else
 s32 VCMV_80088D84(void) {
     UnkStruct_80088B94_Param2 spA0;
     UnkStruct_8025D500 sp48;
@@ -468,7 +554,6 @@ s32 VCMV_80088D84(void) {
 
                                 VCMV_80087EE4((void**)&sp8);
                                 contentReleaseHandleNAND(&sp20);
-
                                 if (var_r31 == 0) {
                                     lbl_8025D2C1 = 1;
                                     return 0;
@@ -488,7 +573,54 @@ block_20:
     VCMV_80087EE4((void**)&spC);
     return var_r31;
 }
+#endif
 
+#if VCMV_REVISION == 1
+s32 VCMV_80089060(void) {
+    CNTHandleNAND sp18;
+    CNTFileInfoNAND sp8;
+    s32 temp_r3;
+    s32 temp_r3_3;
+    s32 var_r28;
+
+    temp_r3 = contentInitHandleNAND(3, &sp18, lbl_8025D2CC);
+    if (temp_r3 == 0) {
+        var_r28 = 0;
+
+        for (int i = 0; *lbl_8025C908[i] != '\0'; i++) {
+            temp_r3_3 = contentConvertPathToEntrynumNAND(&sp18, lbl_8025C908[i]);
+
+            if (temp_r3_3 >= 0) {
+                temp_r3 = contentFastOpenNAND(&sp18, temp_r3_3, &sp8);
+
+                if (temp_r3 == 0) {
+                    VCMV_80087E34((void**)&WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
+                                  (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8);
+                    WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_0C =
+                        (WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08 + contentGetLengthNAND(&sp8));
+
+                    contentReadNAND(&sp8, (void*)WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
+                                    (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, 0);
+
+                    WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_00 = lbl_8025C910[i];
+                    contentCloseNAND(&sp8);
+                    var_r28++;
+                } else {
+                    return temp_r3;
+                }
+            }
+        }
+
+        temp_r3 = contentReleaseHandleNAND(&sp18);
+
+        if (var_r28 == 0) {
+            return -0xE15;
+        }
+
+        return 0;
+    }
+}
+#else
 s32 VCMV_80089060(void) {
     CNTHandleNAND sp18;
     CNTFileInfoNAND sp8;
@@ -503,7 +635,7 @@ s32 VCMV_80089060(void) {
 
     var_r28 = 0;
 
-    for (int i = 0; *lbl_8025C908[i] != nullptr; i++) {
+    for (int i = 0; *lbl_8025C908[i] != '\0'; i++) {
         temp_r3_3 = contentConvertPathToEntrynumNAND(&sp18, lbl_8025C908[i]);
 
         if (temp_r3_3 >= 0 && contentFastOpenNAND(&sp18, temp_r3_3, &sp8) == 0) {
@@ -534,6 +666,7 @@ s32 VCMV_80089060(void) {
 
     return 0;
 }
+#endif
 
 s32 VCMV_800891B4(void) {
     static bool lbl_8025C914 = true;
@@ -583,8 +716,8 @@ void VCMV_80089224(void) {
 #pragma pop
 
 #if VCMV_REVISION == 1
-extern UNKWORD lbl_8025D218;
-extern UNKWORD lbl_8025D21C;
+static UNKWORD lbl_8025D218 = 0;
+static UNKWORD lbl_8025D21C = 0;
 
 void VCMV_80083070(UNKWORD param1) {
     if (lbl_8025D21C == param1 && lbl_8025D2D8 - lbl_8025D218 < 3) {
@@ -596,7 +729,7 @@ void VCMV_80083070(UNKWORD param1) {
 
     switch (param1) {
         case 0: {
-            volatile UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
+            VCMV_VOLATILE UnkStruct_801CA6B0* ptr = &lbl_801CA6B0[lbl_8025D2D4];
 
             if (!lbl_8025D2DC && ptr->unk_50 && lbl_8025D2D8 - lbl_8025D2E0 >= 0x0F) {
                 lbl_8025D2BF = true;
@@ -626,6 +759,8 @@ void VCMV_80083140(void) {
     lbl_8025D218 = lbl_8025D2D8;
     lbl_8025D21C = -1;
 }
+
+void VCMV_80083154(void) {}
 #endif
 
 int abs(int __x) { return labs(__x); }
