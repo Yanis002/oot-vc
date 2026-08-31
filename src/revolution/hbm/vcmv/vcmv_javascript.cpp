@@ -40,7 +40,7 @@ static inline BOOL UnknownInline1(const char* param1, UNKWORD* param2, void* par
     return true;
 }
 
-s32 VCMV_800867DC() { return 1; }
+bool VCMV_800867DC() { return true; }
 
 void VCMV_800867E4(void) {
     lbl_801CA650.unk_00 = lbl_8025C8F8;
@@ -60,15 +60,15 @@ s32 VCMV_80086864(UNKWORD param1, const char* param2, UnkStruct_CommonFuncArg* p
 
     if (strcmp(param2, "vcJavaScriptExt") == 0) {
         if (lbl_8025D298->unk_00(param1, 0, 0, NULL, (void*)VCMV_8008691C, "", 0, &sp8) < 0) {
-            return 0xA;
+            return 0x0A;
         }
 
         param3->unk_00 = 0;
         param3->value_int = sp8;
-        return 7;
+        return 0x07;
     }
 
-    return 8;
+    return 0x08;
 }
 
 s32 VCMV_8008691C(UNKWORD param1, s32 param2, int param3, UNKWORD param4, UnkStruct_CommonFuncArg* param5) {
@@ -142,6 +142,7 @@ s32 VCMV_80086D08(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFu
         lbl_8025D2B4 = true;
         VCMV_80083070(0);
     }
+
     return 0x11;
 }
 
@@ -170,7 +171,7 @@ s32 VCMV_80086DB4(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFu
 }
 
 s32 VCMV_80086E08(UNKWORD param1, UNKWORD param2, s32 param3, UnkStruct_CommonFuncArg* param4) {
-    lbl_8025D2A4 = 1;
+    lbl_8025D2A4 = true;
     return 0x11;
 }
 

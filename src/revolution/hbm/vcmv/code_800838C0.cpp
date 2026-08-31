@@ -145,13 +145,14 @@ UNKWORD VCMV_800838C0(UnkStruct_800838C0* param1, f32* param2) {
     temp_r12 = param1->unk_00 / 128;
     temp2 = param1->unk_00 & 0x7F;
     temp = temp_r27 & 0x7F;
-    var_r10 = lbl_8025D234 + (param1->unk_04 * temp_r0) + temp_r12;
-    var_r27 = &lbl_8025D230[(param1->unk_04 * lbl_8025D240) + (temp_r12 * 128)];
-    var_r29 = &lbl_8025D230[(param1->unk_04 * lbl_8025D240) + temp_r27];
+    var_r10 = lbl_8025D234 + param1->unk_04 * temp_r0 + temp_r12;
+    var_r27 = &lbl_8025D230[param1->unk_04 * lbl_8025D240 + temp_r12 * 128];
+    var_r29 = &lbl_8025D230[param1->unk_04 * lbl_8025D240 + temp_r27];
 
     var_r30 = 0;
     var_r5 = param1->unk_04;
-    var_r3 = param1->unk_0C * ((temp_r27 / 128) - temp_r12 + 1);
+    var_r3 = param1->unk_0C * (temp_r27 / 128 - temp_r12 + 1);
+
     while (var_r5 < temp_r28) {
         temp_r31_2 = lbl_801752F0[var_r5 & 0x7F];
         var_r26 = var_r27 + temp_r31_2;
@@ -192,7 +193,7 @@ UNKWORD VCMV_800838C0(UnkStruct_800838C0* param1, f32* param2) {
     return var_r3;
 }
 
-BOOL VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2) {
+bool VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2) {
     u8 sp58[0x4D];
     u8 sp8[0x4D];
 
@@ -229,7 +230,7 @@ BOOL VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2) {
     temp3 = param1->unk_04 + var_r31;
 
     for (i = 0; i < var_r31; i++) {
-        sp58[i] = (u8)(i + 4);
+        sp58[i] = i + 4;
         sp8[i] = 3;
     }
 
@@ -238,9 +239,9 @@ BOOL VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2) {
     temp_r23 = param1->unk_00 / 128;
     temp2 = param1->unk_00 & 0x7F;
     other_temp = other_temp_r27 & 0x7F;
-    var_r29 = lbl_8025D234 + (temp3 * temp_r22) + temp_r23;
-    var_r28 = &lbl_8025D230[(temp3 * lbl_8025D240) + (temp_r23 * 128)];
-    var_r27 = &lbl_8025D230[(temp3 * lbl_8025D240) + other_temp_r27];
+    var_r29 = lbl_8025D234 + temp3 * temp_r22 + temp_r23;
+    var_r28 = &lbl_8025D230[temp3 * lbl_8025D240 + temp_r23 * 128];
+    var_r27 = &lbl_8025D230[temp3 * lbl_8025D240 + other_temp_r27];
 
     temptemp3 = temp3;
 
@@ -289,16 +290,15 @@ BOOL VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2) {
 
     if (var_r31 == 1) {
         *param2 = sp58[0];
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-BOOL VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2) {
+bool VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2) {
     u8 sp58[0x4D];
     u8 sp8[0x4D];
-
     s32 temp10;
     s32 var_r31;
     s32 temp_r0;
@@ -332,7 +332,7 @@ BOOL VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2) {
     temp3 = param1->unk_04;
 
     for (i = 0; i < var_r31; i++) {
-        sp58[i] = (u8)(i + 4);
+        sp58[i] = i + 4;
         sp8[i] = 3;
     }
 
@@ -341,9 +341,9 @@ BOOL VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2) {
     temp_r23 = param1->unk_00 / 128;
     temp2 = param1->unk_00 & 0x7F;
     other_temp = other_temp_r27 & 0x7F;
-    var_r29 = lbl_8025D234 + (temp3 * temp_r22) + temp_r23;
-    var_r28 = &lbl_8025D230[(temp3 * lbl_8025D240) + (temp_r23 * 128)];
-    var_r27 = &lbl_8025D230[(temp3 * lbl_8025D240) + other_temp_r27];
+    var_r29 = lbl_8025D234 + temp3 * temp_r22 + temp_r23;
+    var_r28 = &lbl_8025D230[temp3 * lbl_8025D240 + temp_r23 * 128];
+    var_r27 = &lbl_8025D230[temp3 * lbl_8025D240 + other_temp_r27];
 
     temptemp3 = temp3;
 
@@ -392,10 +392,10 @@ BOOL VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2) {
 
     if (var_r31 == 1) {
         *param2 = -sp58[0];
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 void VCMV_80083FC4(UnkStruct_800838C0* param1, s32 param2) {
@@ -408,7 +408,7 @@ void VCMV_80083FC4(UnkStruct_800838C0* param1, s32 param2) {
         lbl_801CA5D8.unk_00[3].unk_04 = -100000;
 
         lbl_8025D27E = lbl_8025D27D;
-        lbl_801CA5D8.unk_00[lbl_8025D27D].unk_00 = (0, lbl_8025D284);
+        lbl_801CA5D8.unk_00[lbl_8025D27D].unk_00 = (0, lbl_8025D284); //! TODO: fake match
         lbl_801CA5D8.unk_00[lbl_8025D27D].unk_04 = 0;
         lbl_801CA5D8.unk_38 = lbl_8025D27D;
         lbl_801CA5D8.unk_34 = lbl_8025D27D;
@@ -420,8 +420,8 @@ void VCMV_80083FC4(UnkStruct_800838C0* param1, s32 param2) {
 
     lbl_801CA5D8.unk_4C += param2;
 
-    if (lbl_801CA5D8.unk_51 == 0) {
-        lbl_801CA5D8.unk_51 = 1;
+    if (!lbl_801CA5D8.unk_51) {
+        lbl_801CA5D8.unk_51 = true;
         lbl_801CA5D8.unk_20.unk_00 = param1->unk_00;
         lbl_801CA5D8.unk_20.unk_04 = param1->unk_04;
         lbl_801CA5D8.unk_20.unk_08 = param1->unk_08;
@@ -430,10 +430,9 @@ void VCMV_80083FC4(UnkStruct_800838C0* param1, s32 param2) {
         if (param2 < 0) {
             lbl_801CA5D8.unk_20.unk_0C -= param2;
             lbl_801CA5D8.unk_20.unk_04 += param2;
-            return;
+        } else {
+            lbl_801CA5D8.unk_20.unk_0C += param2;
         }
-
-        lbl_801CA5D8.unk_20.unk_0C += param2;
     }
 }
 
@@ -462,12 +461,12 @@ void VCMV_800840B4(UnkStruct_800838C0* param1, s32 param2) {
 #endif
         } else if (lbl_8025D280 != 0) {
             if (param2 == 1 && param1->unk_0C > 0x50) {
-                lbl_801CA5D8.unk_52 = 0;
+                lbl_801CA5D8.unk_52 = false;
 
                 if (lbl_8025D288 && lbl_801CA5D8.unk_51 != 0) {
                     if ((param1->unk_00 != lbl_801CA5D8.unk_20.unk_00 ||
                          param1->unk_08 != lbl_801CA5D8.unk_20.unk_08)) {
-                        lbl_801CA5D8.unk_52 = 1;
+                        lbl_801CA5D8.unk_52 = true;
                         goto end; //! TODO: fake match?
                     }
                 }
@@ -716,15 +715,15 @@ void VCMV_80084A40(u16 param1) {
     lbl_8025D246 = lbl_8025D240 - (s32)(param1 * 0.5f);
 }
 
-s32 VCMV_80084AAC(s32 param1, s32 param2) {
+bool VCMV_80084AAC(s32 param1, s32 param2) {
     bool var_r31;
     bool var_r30;
     s32 var_r29;
     s32 temp_r26;
     u8 var_r6;
 
-    lbl_8025D240 = (param1 + 3) & ~3;
-    lbl_8025D242 = (param2 + 3) & ~3;
+    lbl_8025D240 = ALIGN_NEXT(param1, 4);
+    lbl_8025D242 = ALIGN_NEXT(param2, 4);
     lbl_8025C8E8 = lbl_8025D240 * 0.5f;
     lbl_8025C8EC = lbl_8025D242 * 0.5f;
     lbl_8025D24C = 0.5f / lbl_8025C8E8;
@@ -782,15 +781,15 @@ s32 VCMV_80084AAC(s32 param1, s32 param2) {
         u32 size;
 
 #if VCMV_REVISION == 1
-        size = (lbl_8025D238 / 118);
+        size = lbl_8025D238 / 118;
 #else
-        size = (((lbl_8025D242 * ((s32)(lbl_8025D240 + 0x7F) / 128)) * 4) + 0x1F) & ~0x1F;
+        size = ALIGN_NEXT(lbl_8025D242 * ((lbl_8025D240 + 0x7F) / 128) * 4, 32);
 #endif
 
         var_r31 &= VCMV_80087E34((void**)&lbl_8025D234, size, lbl_8025D2CC, lbl_8025D2C8);
 
         if (var_r31 != 0) {
-            return 1;
+            return true;
         }
 
         VCMV_80087EE4((void**)&lbl_8025D230);
@@ -801,7 +800,7 @@ loop_at_end:
         VCMV_80087EE4(&lbl_801CA388[var_r29]);
     }
 
-    return 0;
+    return false;
 }
 
 void VCMV_80084DF4(void) {
@@ -942,7 +941,7 @@ void VCMV_80085164(void) {
         VCMV_800838C0(&sp10, &sp8);
     }
 
-    int value = OSDisableInterrupts();
+    BOOL status = OSDisableInterrupts();
     if (lbl_8025D27A) {
         lbl_8025D27A = false;
 
@@ -954,7 +953,7 @@ void VCMV_80085164(void) {
 
         lbl_8025D27D = lbl_8025D27C;
     }
-    OSRestoreInterrupts(value);
+    OSRestoreInterrupts(status);
 }
 
 void VCMV_800855BC(GXTexObj* param1, GXColor param2) {
@@ -1031,7 +1030,7 @@ void VCMV_80085874(void) {
     GXColor sp24 = {255, 255, 255, 255};
 
     if (lbl_8025D288) {
-        if ((lbl_8025D2D8 - lbl_8025D2E8) > 0xA) {
+        if (lbl_8025D2D8 - lbl_8025D2E8 > 0xA) {
             lbl_8025D280 = 0;
         }
 
@@ -1141,6 +1140,7 @@ void VCMV_80085874(void) {
             if (lbl_801CA5D8.unk_34 != lbl_801CA5D8.unk_30) {
                 VCMV_800855BC(&lbl_801CA308[lbl_801CA5D8.unk_34], sp24);
             }
+
             {
                 GXBegin(GX_QUADS, GX_VTXFMT0, 4);
                 GXPosition3f32(temp_f27, temp_f24, 0.0f);
@@ -1256,7 +1256,7 @@ void VCMV_80085874(void) {
         }
 
         f32 temp_f8 = lbl_8025D260 * lbl_8025D264;
-        f32 temp_f11 = temp_f8 - (lbl_8025C8F0 * lbl_8025D264);
+        f32 temp_f11 = temp_f8 - lbl_8025C8F0 * lbl_8025D264;
 
         temp_f8 *= 0.15f;
         temp_f11 *= 0.15f;

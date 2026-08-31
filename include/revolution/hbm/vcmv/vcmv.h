@@ -86,8 +86,8 @@ typedef struct UnkStruct_801CA5D8 {
     /* 48 */ f32 unk_48;
     /* 4C */ UNKWORD unk_4C;
     /* 50 */ UNKWORD unk_50;
-    /* 51 */ u8 unk_51;
-    /* 52 */ u8 unk_52;
+    /* 51 */ bool unk_51;
+    /* 52 */ bool unk_52;
 } UnkStruct_801CA5D8; // size = 0x54
 
 typedef struct UnkStruct_8008461C_Arg4 {
@@ -117,8 +117,8 @@ extern s32 lbl_8025D224;
 
 // vcmv_800838C0.cpp
 UNKWORD VCMV_800838C0(UnkStruct_800838C0* param1, f32* param2);
-BOOL VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2);
-BOOL VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2);
+bool VCMV_80083A60(UnkStruct_800838C0* param1, s32* param2);
+bool VCMV_80083D18(UnkStruct_800838C0* param1, s32* param2);
 void VCMV_80083FC4(UnkStruct_800838C0* param1, s32 param2);
 void VCMV_800840B4(UnkStruct_800838C0* param1, s32 param2);
 void VCMV_80084268(void);
@@ -126,7 +126,7 @@ UNKWORD VCMV_8008461C(void* param1, UNKWORD param2, UNKWORD param3, UnkStruct_80
 void VCMV_80084A18(void* param1);
 void VCMV_80084A34(UNKWORD param1, UNKWORD param2);
 void VCMV_80084A40(u16 param1);
-s32 VCMV_80084AAC(s32 param1, s32 param2);
+bool VCMV_80084AAC(s32 param1, s32 param2);
 void VCMV_80084DF4(void);
 void VCMV_80084E54(void);
 void VCMV_80084F34(s32 param1);
@@ -189,7 +189,7 @@ typedef struct UnkStruct_8025D2B0 {
     /* 08 */ UNKWORD unk_08;
 } UnkStruct_8025D2B0;
 
-s32 VCMV_800867DC();
+bool VCMV_800867DC();
 void VCMV_800867E4(void);
 s32 VCMV_80086864(UNKWORD param1, const char* param2, UnkStruct_CommonFuncArg* param3);
 s32 VCMV_8008691C(UNKWORD param1, s32 param2, int param3, UNKWORD param4, UnkStruct_CommonFuncArg* param5);
@@ -227,7 +227,7 @@ void VCMV_80088654(MEMAllocator* param1, MEMAllocator* param2);
 void VCMV_80088660(void);
 void VCMV_80088664(void);
 void VCMV_80088668(UNKWORD param1, UNKWORD param2);
-void VCMV_8008866C(s32 param1, s32 param2);
+bool VCMV_8008866C(s32 param1, s32 param2);
 void VCMV_80088670(u16 param1);
 void VCMV_80088674(void);
 bool VCMV_80088678(u32 param1);
@@ -247,7 +247,7 @@ extern VCMV_VOLATILE UnkStruct_801CA6B0 lbl_801CA6B0[4];
 extern volatile bool lbl_8025D2BE;
 extern volatile bool lbl_8025D2BF;
 extern bool lbl_8025D2C0;
-extern u8 lbl_8025D2C1;
+extern bool lbl_8025D2C1;
 extern u8 lbl_8025D2C2;
 extern UNKWORD lbl_8025D2C4;
 extern MEMAllocator* lbl_8025D2C8;

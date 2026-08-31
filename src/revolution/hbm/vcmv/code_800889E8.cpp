@@ -257,7 +257,7 @@ const char* lbl_8025C908[] = {"WiiNTLG-Regular.ttc", ""};
 const char* lbl_8025C910[] = {"Regular"};
 
 static inline void UnknownInline1(UnkStruct_8025D500* temp_r30) {
-    for (u32 var_r29 = 0; var_r29 < 0x70; var_r29++) {
+    for (u32 var_r29 = 0; var_r29 < ARRAY_COUNT(lbl_80176360); var_r29++) {
         *(UNKWORD*)lbl_80176360[var_r29].unk_04 = fn_80100010(temp_r30, lbl_80176360[var_r29].unk_00);
     }
 }
@@ -295,7 +295,7 @@ bool VCMV_80088A34(void) {
                 return false;
             }
 
-            ptr->len = (ptr->len + 0x1F) & ~0x1F;
+            ptr->len = ALIGN_NEXT(ptr->len, 32);
 
             if (ptr->buf == NULL) {
                 OSReport("AllocIfNecessary(%d)\n", ptr->len);
@@ -325,14 +325,12 @@ void VCMV_80088B94(u8* param1, UnkStruct_80088B94_Param2* param2, u32 param3) {
         param2->unk_1018 = 0;
 
         temp_r8 = *(u32*)param2->unk_1000;
-        param2->unk_1008 =
-            ((temp_r8 >> 24) | ((temp_r8 >> 8) & 0xFF00) | ((temp_r8 & 0xFF00) << 8) | (temp_r8 << 24)) >> 8;
+        param2->unk_1008 = (temp_r8 >> 24 | (temp_r8 >> 8) & 0xFF00 | (temp_r8 & 0xFF00) << 8 | temp_r8 << 24) >> 8;
         param2->unk_1000 += sizeof(u32);
 
         if (param2->unk_1008 == 0) {
             temp_r8 = *(u32*)param2->unk_1000;
-            param2->unk_1008 =
-                (temp_r8 >> 24) | ((temp_r8 >> 8) & 0xFF00) | ((temp_r8 & 0xFF00) << 8) | (temp_r8 << 24);
+            param2->unk_1008 = temp_r8 >> 24 | (temp_r8 >> 8) & 0xFF00 | (temp_r8 & 0xFF00) << 8 | temp_r8 << 24;
             param2->unk_1000 += sizeof(u32);
         }
     }
@@ -410,9 +408,8 @@ s32 VCMV_80088D84(void) {
 
     if (var_r31 == 0) {
         if (contentOpenNAND(&sp20, "wwwlib-rvl.lz7", &sp10) == 0) {
-            if (VCMV_80087E34((void**)&spC, (contentGetLengthNAND(&sp10) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8) !=
-                0) {
-                contentReadNAND(&sp10, spC, (contentGetLengthNAND(&sp10) + 0x1F) & ~0x1F, 0);
+            if (VCMV_80087E34((void**)&spC, ALIGN_NEXT(contentGetLengthNAND(&sp10), 32), lbl_8025D2CC, lbl_8025D2C8)) {
+                contentReadNAND(&sp10, spC, ALIGN_NEXT(contentGetLengthNAND(&sp10), 32), 0);
                 contentCloseNAND(&sp10);
 
                 memset(&spA0, 0, sizeof(spA0));
@@ -421,14 +418,14 @@ s32 VCMV_80088D84(void) {
                 VCMV_80088B94((u8*)&sp48, &spA0, sizeof(sp48));
                 temp_r3_5 = fn_80100600(&sp48, 2);
 
-                if (VCMV_80087E34((void**)&lbl_8025D500, (temp_r3_5 + 0x1F) & ~0x1F, lbl_8025D2C8, lbl_8025D2CC) != 0) {
+                if (VCMV_80087E34((void**)&lbl_8025D500, ALIGN_NEXT(temp_r3_5, 32), lbl_8025D2C8, lbl_8025D2CC)) {
                     spA0.unk_1004 = 0;
                     spA0.unk_1000 = spC;
                     VCMV_80088B94(lbl_8025D500, &spA0, temp_r3_5);
                     temp_r30 = (UnkStruct_8025D500*)lbl_8025D500;
 
                     if (temp_r30->unk_1C != 0) {
-                        if (VCMV_80087E34((void**)&lbl_8025D504, temp_r30->unk_1C, lbl_8025D2C8, lbl_8025D2CC) == 0) {
+                        if (!VCMV_80087E34((void**)&lbl_8025D504, temp_r30->unk_1C, lbl_8025D2C8, lbl_8025D2CC)) {
                             goto block_20; //! TODO: can we get rid of that?
                         }
 
@@ -436,7 +433,7 @@ s32 VCMV_80088D84(void) {
                     }
 
                     temp_r29 = 0x902420 - temp_r3_5;
-                    if (VCMV_80087E34((void**)&sp8, (temp_r29 + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8) != 0) {
+                    if (VCMV_80087E34((void**)&sp8, ALIGN_NEXT(temp_r29, 32), lbl_8025D2CC, lbl_8025D2C8)) {
                         VCMV_80088B94(sp8, &spA0, temp_r29);
                         VCMV_80087EE4((void**)&spC);
                         temp_r4 = ((uintptr_t)sp8 - temp_r3_5) - (uintptr_t)temp_r30;
@@ -457,7 +454,7 @@ s32 VCMV_80088D84(void) {
                         contentReleaseHandleNAND(&sp20);
 
                     offset_0x244:
-                        lbl_8025D2C1 = 1;
+                        lbl_8025D2C1 = true;
                         return 0;
                     }
                 }
@@ -497,11 +494,10 @@ s32 VCMV_80088D84(void) {
         var_r31 = contentOpenNAND(&sp20, "wwwlib-rvl.lz7", &sp10);
 
         if (var_r31 == 0) {
-            if (VCMV_80087E34((void**)&spC, (contentGetLengthNAND(&sp10) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8) ==
-                0) {
+            if (!VCMV_80087E34((void**)&spC, ALIGN_NEXT(contentGetLengthNAND(&sp10), 32), lbl_8025D2CC, lbl_8025D2C8)) {
                 var_r31 = -0xE12;
             } else {
-                var_r31 = contentReadNAND(&sp10, spC, (contentGetLengthNAND(&sp10) + 0x1F) & ~0x1F, 0);
+                var_r31 = contentReadNAND(&sp10, spC, ALIGN_NEXT(contentGetLengthNAND(&sp10), 32), 0);
 
                 if (var_r31 > 0) {
                     var_r31 = contentCloseNAND(&sp10);
@@ -513,8 +509,8 @@ s32 VCMV_80088D84(void) {
                         VCMV_80088B94((u8*)&sp48, &spA0, sizeof(sp48));
                         temp_r3_5 = fn_80100600(&sp48, 2);
 
-                        if (VCMV_80087E34((void**)&lbl_8025D500, (temp_r3_5 + 0x1F) & ~0x1F, lbl_8025D2C8,
-                                          lbl_8025D2CC) == 0) {
+                        if (!VCMV_80087E34((void**)&lbl_8025D500, ALIGN_NEXT(temp_r3_5, 32), lbl_8025D2C8,
+                                           lbl_8025D2CC)) {
                             var_r31 = -0xE11;
                         } else {
                             spA0.unk_1004 = 0;
@@ -523,8 +519,8 @@ s32 VCMV_80088D84(void) {
                             temp_r30 = (UnkStruct_8025D500*)lbl_8025D500;
 
                             if (temp_r30->unk_1C != 0) {
-                                if (VCMV_80087E34((void**)&lbl_8025D504, temp_r30->unk_1C, lbl_8025D2C8,
-                                                  lbl_8025D2CC) == 0) {
+                                if (!VCMV_80087E34((void**)&lbl_8025D504, temp_r30->unk_1C, lbl_8025D2C8,
+                                                   lbl_8025D2CC)) {
                                     var_r31 = -0xE13;
                                     goto block_20; //! TODO: can we get rid of that?
                                 }
@@ -533,8 +529,7 @@ s32 VCMV_80088D84(void) {
                             }
 
                             temp_r29 = 0x902420 - temp_r3_5;
-                            if (VCMV_80087E34((void**)&sp8, (temp_r29 + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8) ==
-                                0) {
+                            if (!VCMV_80087E34((void**)&sp8, ALIGN_NEXT(temp_r29, 32), lbl_8025D2CC, lbl_8025D2C8)) {
                                 var_r31 = -0xE14;
                             } else {
                                 VCMV_80088B94(sp8, &spA0, temp_r29);
@@ -555,7 +550,7 @@ s32 VCMV_80088D84(void) {
                                 VCMV_80087EE4((void**)&sp8);
                                 contentReleaseHandleNAND(&sp20);
                                 if (var_r31 == 0) {
-                                    lbl_8025D2C1 = 1;
+                                    lbl_8025D2C1 = true;
                                     return 0;
                                 }
                             }
@@ -595,12 +590,13 @@ s32 VCMV_80089060(void) {
 
                 if (temp_r3 == 0) {
                     VCMV_80087E34((void**)&WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
-                                  (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8);
+                                  ALIGN_NEXT(contentGetLengthNAND(&sp8), 32), lbl_8025D2CC, lbl_8025D2C8);
+
                     WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_0C =
                         (WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08 + contentGetLengthNAND(&sp8));
 
                     contentReadNAND(&sp8, (void*)WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
-                                    (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, 0);
+                                    ALIGN_NEXT(contentGetLengthNAND(&sp8), 32), 0);
 
                     WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_00 = lbl_8025C910[i];
                     contentCloseNAND(&sp8);
@@ -640,12 +636,13 @@ s32 VCMV_80089060(void) {
 
         if (temp_r3_3 >= 0 && contentFastOpenNAND(&sp18, temp_r3_3, &sp8) == 0) {
             VCMV_80087E34((void**)&WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
-                          (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, lbl_8025D2CC, lbl_8025D2C8);
+                          ALIGN_NEXT(contentGetLengthNAND(&sp8), 32), lbl_8025D2CC, lbl_8025D2C8);
+
             WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_0C =
                 (WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08 + contentGetLengthNAND(&sp8));
 
             if (contentReadNAND(&sp8, (void*)WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_08,
-                                (contentGetLengthNAND(&sp8) + 0x1F) & ~0x1F, 0) > 0) {
+                                ALIGN_NEXT(contentGetLengthNAND(&sp8), 32), 0) > 0) {
                 WWW_FONT_FILE_DATA_TABLE__[var_r28].unk_00 = lbl_8025C910[i];
 
                 if (contentCloseNAND(&sp8) == 0) {
@@ -671,12 +668,12 @@ s32 VCMV_80089060(void) {
 s32 VCMV_800891B4(void) {
     static bool lbl_8025C914 = true;
 
-    lbl_8025D2C0 = 0;
+    lbl_8025D2C0 = false;
 
     if (lbl_8025C914) {
         lbl_8025C914 = false;
 
-        if (VCMV_80088A34() == 0) {
+        if (!VCMV_80088A34()) {
             return 0;
         }
     }
@@ -693,14 +690,14 @@ s32 VCMV_800891B4(void) {
 #pragma push
 #pragma opt_unroll_loops off
 void VCMV_80089224(void) {
-    lbl_8025D2C1 = 0;
+    lbl_8025D2C1 = false;
 
     if (lbl_8025D500 != NULL) {
         if (((UnkStruct_8025D500*)lbl_8025D500)->unk_28 != NULL) {
             ((UnkStruct_8025D500*)lbl_8025D500)->unk_28();
         }
 
-        for (int i = 0; i < 112; i++) {
+        for (int i = 0; i < ARRAY_COUNT(lbl_80176360); i++) {
             *(UNKWORD*)lbl_80176360[i].unk_04 = (UNKWORD)VCMV_800889D8;
         }
 

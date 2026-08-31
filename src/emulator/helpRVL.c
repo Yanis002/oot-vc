@@ -467,7 +467,7 @@ static void helpMenuRunManualViewer(void) {
     VCMV_80088670(0xC);
 
     for (; var_r31 > 0; var_r31 -= MB(1)) {
-        if (VCMV_80088678(var_r31) != 0) {
+        if (VCMV_80088678(var_r31)) {
             break;
         }
     }

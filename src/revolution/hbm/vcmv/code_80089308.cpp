@@ -5,6 +5,7 @@
 #include "runtime/Gecko_setjmp.h"
 #include "runtime/MWCPlusLib.h"
 
+#include <bsearch.h>
 #include <locale.h>
 #include <math.h>
 #include <printf.h>
@@ -16,26 +17,14 @@
 extern "C" UNKWORD fn_801004A8(void*);
 extern "C" UnkStruct_80100070* fn_80100070(void*, const char*);
 
-//! TODO: fix those declarations and move them to the right header
-extern "C" void __cvt_fp2unsigned();
-extern "C" void __cvt_sll_dbl();
+extern "C" unsigned long __cvt_fp2unsigned(register double d);
+extern "C" void __cvt_sll_dbl(void);
 extern "C" void __div2i();
 extern "C" void __mod2i();
-extern "C" void __ptmf_scall();
+extern "C" void __ptmf_scall(...);
 extern "C" void __shl2i();
-extern "C" void abort();
-extern "C" void atol();
-extern "C" void bsearch();
-extern "C" void exp();
-extern "C" void getenv();
-extern "C" void itoa();
-extern "C" void strcspn();
-extern "C" void strnicmp();
-extern "C" void strpbrk();
-extern "C" void strrchr();
-extern "C" void strspn();
-extern "C" void strtol();
-extern "C" void strtoul();
+extern "C" void abort(void);
+extern "C" int getenv(void);
 
 const UnkStruct_80176360 lbl_8016B800[] = {
     {"ARCClose", (void*)ARCClose},
@@ -185,6 +174,7 @@ void VCMV_80089308(UnkStruct_80089308* param1) {
 
     for (const UnkStruct_80176360* ptr = lbl_8016B800; ptr->unk_04 != 0; ptr++) {
         UnkStruct_80100070* temp_r3 = fn_80100070(new_var, ptr->unk_00);
+
         if (temp_r3 != 0) {
             temp_r3->unk_04 = ((uintptr_t)ptr->unk_04) - new_var->unk_0C[temp_r3->unk_08].unk_00;
         }
